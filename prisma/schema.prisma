@@ -1,0 +1,139 @@
+// CS2 Guessing Game — data model.
+//
+// Local development uses SQLite (zero setup, file-based). For production,
+// point DATABASE_URL at a Postgres instance (Neon/Supabase/Railway) — see
+// the "Switching to Postgres" section of the README. The schema below only
+// uses types/features supported by both providers.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Skins
+// ---------------------------------------------------------------------------
+
+model Skin {
+  id           String   @id // stable slug derived from the source dataset id
+  name         String // e.g. "Redline"
+  weapon       String // e.g. "AK-47"
+  displayName  String // e.g. "AK-47 | Redline"
+  imageUrl     String
+  rarity       String // normalized rarity key, see lib/game/rarityMatching.ts
+  caseOrCollection String? // display name of the case/collection this skin is found in
+  caseType     String? // "case" | "collection" | null (no known source)
+  wear         String // canonical normalized wear for this skin, see lib/game/wearMatching.ts
+  availableWears String // JSON-encoded string[] of all wear names this skin can drop in (display/reference only)
+  color        String // normalized color bucket, see lib/game/colorMatching.ts
+  colorSource  String // "image" | "fallback" — how `color` was derived (documents provenance)
+  // Lowercased "weapon | name" used for case-insensitive search. Prisma's
+  // `mode: "insensitive"` filter only works on Postgres/MySQL, not SQLite —
+  // this column keeps search portable across both providers.
+  searchText   String
+  isKnife      Boolean  @default(false)
+  isGlove      Boolean  @default(false)
+  hasStatTrak  Boolean  @default(false) // whether a StatTrak(TM) variant exists (not a separate entry)
+  active       Boolean  @default(true) // set false to retire a skin from rotation without deleting history
+  popularity   Int      @default(0) // higher = more likely to be picked; also used to curate the pool
+  sourceId     String // original id from the upstream dataset, for re-import/debugging
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  dailyGames   DailySkinGame[]
+  gameSessions GameSession[]
+
+  @@index([active])
+  @@index([weapon])
+  @@index([rarity])
+  @@index([searchText])
+}
+
+// ---------------------------------------------------------------------------
+// Maps
+// ---------------------------------------------------------------------------
+
+model GameMap {
+  id            String   @id // slug, e.g. "dust2"
+  name          String // display name, e.g. "Dust II"
+  imageUrl      String
+  imageWidth    Int
+  imageHeight   Int
+  // Focal point (0-100, percent of image dimensions) the zoomed-in reveal
+  // centers on. Defaults to dead center; override per map to start the
+  // reveal on a more recognizable landmark.
+  focalX        Int      @default(50)
+  focalY        Int      @default(50)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  gameSessions  GameSession[]
+
+  @@index([active])
+}
+
+// ---------------------------------------------------------------------------
+// Daily challenge — one deterministic row per UTC calendar day.
+// Pre-materializing the day's target (instead of only hashing on the fly)
+// lets us guarantee an even rotation with no immediate repeats. See
+// lib/game/dailyTarget.ts for the selection algorithm.
+// ---------------------------------------------------------------------------
+
+model DailySkinGame {
+  id        String   @id @default(cuid())
+  dateKey   String   @unique // UTC calendar date, "YYYY-MM-DD"
+  skinId    String
+  skin      Skin     @relation(fields: [skinId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Game sessions — server-authoritative state for both skin and map modes.
+// The target id is NEVER serialized to the client until the game ends.
+// ---------------------------------------------------------------------------
+
+// `mode` and `status` are plain strings rather than Prisma enums — SQLite's
+// connector doesn't support enums, and this schema targets both SQLite
+// (local dev) and Postgres (production) without forking. Valid values are
+// enforced at the application layer via the GameMode/GameStatus TS unions
+// in src/lib/game/types.ts — the same pattern already used for rarity,
+// wear, and color.
+model GameSession {
+  id            String     @id @default(cuid())
+  sessionToken  String // anonymous player identifier, from a signed httpOnly cookie
+  mode          String // "DAILY_SKIN" | "UNLIMITED_SKIN" | "MAP"
+  dateKey       String? // set only for DAILY_SKIN, ties the session to one calendar day
+
+  targetSkinId  String?
+  targetSkin    Skin?      @relation(fields: [targetSkinId], references: [id])
+  targetMapId   String?
+  targetMap     GameMap?   @relation(fields: [targetMapId], references: [id])
+
+  status        String     @default("IN_PROGRESS") // "IN_PROGRESS" | "WON" | "LOST"
+  cluesUsed     String     @default("[]") // JSON-encoded string[] of clue keys revealed so far
+  startedAt     DateTime   @default(now())
+  completedAt   DateTime?
+
+  guesses       GameGuess[]
+
+  @@unique([sessionToken, mode, dateKey])
+  @@index([sessionToken])
+}
+
+model GameGuess {
+  id            String      @id @default(cuid())
+  sessionId     String
+  session       GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  guessOrder    Int // 1-indexed attempt number within the session
+  guessedSkinId String?
+  guessedMapId  String?
+  result        String // JSON-encoded ComparisonResult (skin) or {correct: boolean} (map)
+  createdAt     DateTime    @default(now())
+
+  @@unique([sessionId, guessOrder])
+}

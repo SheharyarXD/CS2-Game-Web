@@ -1,0 +1,192 @@
+/**
+ * Curated pool of recognizable/popular CS2 skins.
+ *
+ * The upstream dataset (see scripts/fetch-skin-data.ts) contains every skin
+ * Valve has ever shipped — thousands of entries, most of them obscure. The
+ * client explicitly wants the game built around popular, recognizable
+ * skins rather than an exhaustive catalogue, so this file is the single
+ * place that decides which skins make it into the game.
+ *
+ * Matching is done by (weapon display name, pattern/skin name) against the
+ * source dataset — see scripts/seed-skins.ts. Entries that don't match
+ * anything in the current dataset are skipped with a warning rather than
+ * failing the import, so a Valve rename doesn't break seeding.
+ *
+ * To add a new skin to rotation: add a row here and re-run `npm run
+ * seed:skins` — it's an upsert, safe to run repeatedly.
+ */
+export interface AllowlistEntry {
+  weapon: string;
+  name: string;
+}
+
+export const POPULAR_SKINS: AllowlistEntry[] = [
+  // --- Knives -------------------------------------------------------------
+  { weapon: "Karambit", name: "Doppler" },
+  { weapon: "Karambit", name: "Fade" },
+  { weapon: "Karambit", name: "Marble Fade" },
+  { weapon: "Karambit", name: "Case Hardened" },
+  { weapon: "Karambit", name: "Crimson Web" },
+  { weapon: "Karambit", name: "Slaughter" },
+  { weapon: "Karambit", name: "Tiger Tooth" },
+  { weapon: "Karambit", name: "Autotronic" },
+  { weapon: "Butterfly Knife", name: "Fade" },
+  { weapon: "Butterfly Knife", name: "Doppler" },
+  { weapon: "Butterfly Knife", name: "Marble Fade" },
+  { weapon: "Butterfly Knife", name: "Slaughter" },
+  { weapon: "Butterfly Knife", name: "Crimson Web" },
+  { weapon: "Bayonet", name: "Fade" },
+  { weapon: "Bayonet", name: "Doppler" },
+  { weapon: "Bayonet", name: "Case Hardened" },
+  { weapon: "Bayonet", name: "Tiger Tooth" },
+  { weapon: "M9 Bayonet", name: "Doppler" },
+  { weapon: "M9 Bayonet", name: "Marble Fade" },
+  { weapon: "M9 Bayonet", name: "Crimson Web" },
+  { weapon: "Flip Knife", name: "Doppler" },
+  { weapon: "Flip Knife", name: "Fade" },
+  { weapon: "Gut Knife", name: "Fade" },
+  { weapon: "Gut Knife", name: "Doppler" },
+  { weapon: "Huntsman Knife", name: "Fade" },
+  { weapon: "Huntsman Knife", name: "Crimson Web" },
+  { weapon: "Talon Knife", name: "Fade" },
+  { weapon: "Talon Knife", name: "Doppler" },
+  { weapon: "Skeleton Knife", name: "Fade" },
+  { weapon: "Skeleton Knife", name: "Doppler" },
+  { weapon: "Classic Knife", name: "Fade" },
+  { weapon: "Ursus Knife", name: "Doppler" },
+  { weapon: "Navaja Knife", name: "Doppler" },
+  { weapon: "Stiletto Knife", name: "Doppler" },
+  { weapon: "Paracord Knife", name: "Fade" },
+  { weapon: "Survival Knife", name: "Fade" },
+  { weapon: "Nomad Knife", name: "Fade" },
+
+  // --- Gloves ---------------------------------------------------------------
+  { weapon: "Sport Gloves", name: "Vice" },
+  { weapon: "Sport Gloves", name: "Pandora's Box" },
+  { weapon: "Specialist Gloves", name: "Crimson Kimono" },
+  { weapon: "Specialist Gloves", name: "Fade" },
+  { weapon: "Driver Gloves", name: "King Snake" },
+  { weapon: "Driver Gloves", name: "Crimson Weave" },
+  { weapon: "Hand Wraps", name: "Cobalt Skulls" },
+  { weapon: "Hand Wraps", name: "Leather" },
+  { weapon: "Moto Gloves", name: "Spearmint" },
+  { weapon: "Moto Gloves", name: "Boom!" },
+  { weapon: "Hydra Gloves", name: "Case Hardened" },
+  { weapon: "Bloodhound Gloves", name: "Guerrilla" },
+  { weapon: "Broken Fang Gloves", name: "Jade" },
+
+  // --- Rifles -----------------------------------------------------------
+  { weapon: "AK-47", name: "Redline" },
+  { weapon: "AK-47", name: "Vulcan" },
+  { weapon: "AK-47", name: "Fire Serpent" },
+  { weapon: "AK-47", name: "Wasteland Rebel" },
+  { weapon: "AK-47", name: "Bloodsport" },
+  { weapon: "AK-47", name: "Neon Rider" },
+  { weapon: "AK-47", name: "Asiimov" },
+  { weapon: "AK-47", name: "The Empress" },
+  { weapon: "AK-47", name: "Case Hardened" },
+  { weapon: "AK-47", name: "Fuel Injector" },
+  { weapon: "AK-47", name: "Nightwish" },
+  { weapon: "AK-47", name: "Jet Set" },
+  { weapon: "AK-47", name: "Legion of Anubis" },
+  { weapon: "AK-47", name: "Gold Arabesque" },
+  { weapon: "AK-47", name: "Slate" },
+  { weapon: "AK-47", name: "Elite Build" },
+  { weapon: "M4A4", name: "Howl" },
+  { weapon: "M4A4", name: "Asiimov" },
+  { weapon: "M4A4", name: "Neo-Noir" },
+  { weapon: "M4A4", name: "The Emperor" },
+  { weapon: "M4A4", name: "Dragon King" },
+  { weapon: "M4A4", name: "Poseidon" },
+  { weapon: "M4A4", name: "Desolate Space" },
+  { weapon: "M4A1-S", name: "Printstream" },
+  { weapon: "M4A1-S", name: "Hyper Beast" },
+  { weapon: "M4A1-S", name: "Golden Coil" },
+  { weapon: "M4A1-S", name: "Icarus Fell" },
+  { weapon: "M4A1-S", name: "Knight" },
+  { weapon: "M4A1-S", name: "Cyrex" },
+  { weapon: "M4A1-S", name: "Player Two" },
+  { weapon: "AWP", name: "Dragon Lore" },
+  { weapon: "AWP", name: "Asiimov" },
+  { weapon: "AWP", name: "Gungnir" },
+  { weapon: "AWP", name: "Medusa" },
+  { weapon: "AWP", name: "Lightning Strike" },
+  { weapon: "AWP", name: "Hyper Beast" },
+  { weapon: "AWP", name: "Neo-Noir" },
+  { weapon: "AWP", name: "Fever Dream" },
+  { weapon: "AWP", name: "Wildfire" },
+  { weapon: "AWP", name: "Redline" },
+  { weapon: "AWP", name: "Chromatic Aberration" },
+  { weapon: "AWP", name: "Containment Breach" },
+  { weapon: "AWP", name: "The Prince" },
+  { weapon: "AWP", name: "Safari Mesh" },
+  { weapon: "AUG", name: "Chameleon" },
+  { weapon: "AUG", name: "Akihabara Accept" },
+  { weapon: "SG 553", name: "Integrale" },
+  { weapon: "FAMAS", name: "Roll Cage" },
+  { weapon: "Galil AR", name: "Chatterbox" },
+  { weapon: "Galil AR", name: "Cerberus" },
+  { weapon: "SSG 08", name: "Dragonfire" },
+  { weapon: "SSG 08", name: "Blood in the Water" },
+  { weapon: "G3SG1", name: "The Executioner" },
+  { weapon: "SCAR-20", name: "Cardiac" },
+
+  // --- Pistols ------------------------------------------------------------
+  { weapon: "Desert Eagle", name: "Blaze" },
+  { weapon: "Desert Eagle", name: "Printstream" },
+  { weapon: "Desert Eagle", name: "Code Red" },
+  { weapon: "Desert Eagle", name: "Hypnotic" },
+  { weapon: "Desert Eagle", name: "Fennec Fox" },
+  { weapon: "Desert Eagle", name: "Golden Koi" },
+  { weapon: "Glock-18", name: "Fade" },
+  { weapon: "Glock-18", name: "Water Elemental" },
+  { weapon: "Glock-18", name: "Dragon Tattoo" },
+  { weapon: "Glock-18", name: "Gamma Doppler" },
+  { weapon: "Glock-18", name: "Bullet Queen" },
+  { weapon: "USP-S", name: "Kill Confirmed" },
+  { weapon: "USP-S", name: "Neo-Noir" },
+  { weapon: "USP-S", name: "Orion" },
+  { weapon: "USP-S", name: "The Traitor" },
+  { weapon: "USP-S", name: "Printstream" },
+  { weapon: "P250", name: "Sand Dune" },
+  { weapon: "P250", name: "Asiimov" },
+  { weapon: "P250", name: "Nuclear Threat" },
+  { weapon: "Five-SeveN", name: "Case Hardened" },
+  { weapon: "Five-SeveN", name: "Monkey Business" },
+  { weapon: "Tec-9", name: "Fuel Injector" },
+  { weapon: "Tec-9", name: "Nuclear Threat" },
+  { weapon: "CZ75-Auto", name: "Tigris" },
+  { weapon: "Dual Berettas", name: "Cobra Strike" },
+  { weapon: "P2000", name: "Fire Elemental" },
+  { weapon: "R8 Revolver", name: "Fade" },
+
+  // --- SMGs -----------------------------------------------------------------
+  { weapon: "MP9", name: "Hydra" },
+  { weapon: "MAC-10", name: "Neon Rider" },
+  { weapon: "MAC-10", name: "Fade" },
+  { weapon: "MP7", name: "Nemesis" },
+  { weapon: "UMP-45", name: "Primal Saber" },
+  { weapon: "P90", name: "Asiimov" },
+  { weapon: "P90", name: "Death by Kitty" },
+  { weapon: "PP-Bizon", name: "Judgement of Anubis" },
+
+  // --- Heavy ------------------------------------------------------------
+  { weapon: "Nova", name: "Hyper Beast" },
+  { weapon: "XM1014", name: "Tranquility" },
+  { weapon: "Sawed-Off", name: "The Kraken" },
+  { weapon: "MAG-7", name: "Bulldozer" },
+  { weapon: "Negev", name: "Mjolnir" },
+  { weapon: "M249", name: "System Lock" },
+
+  // --- A spread of common/low-rarity skins, so not every guess is a Covert ---
+  { weapon: "AK-47", name: "Safety Net" },
+  { weapon: "M4A4", name: "Zirka" },
+  { weapon: "MP9", name: "Storm" },
+  { weapon: "P250", name: "Contract" },
+  { weapon: "Five-SeveN", name: "Forest Night" },
+  { weapon: "Glock-18", name: "Sand Dune" },
+  { weapon: "P90", name: "Sand Spray" },
+  { weapon: "MAC-10", name: "Urban DDPAT" },
+  { weapon: "Nova", name: "Forest Leaves" },
+  { weapon: "SG 553", name: "Anodized Navy" },
+];
