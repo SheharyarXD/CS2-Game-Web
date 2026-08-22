@@ -31,6 +31,7 @@ export type RarityKey =
   | "restricted"
   | "classified"
   | "covert"
+  | "contraband"
   | "extraordinary";
 
 export type CaseType = "case" | "collection" | null;

@@ -47,6 +47,7 @@ export const RARITY_ORDER: RarityKey[] = [
   "restricted",
   "classified",
   "covert",
+  "contraband",
   "extraordinary",
 ];
 
@@ -57,5 +58,8 @@ export const RARITY_LABELS: Record<RarityKey, string> = {
   restricted: "Restricted",
   classified: "Classified",
   covert: "Covert",
+  // Valve's one-off rarity for skins pulled from cases (e.g. M4A4 | Howl) —
+  // rarer than Covert, distinct from the knife/glove "Extraordinary" tier.
+  contraband: "Contraband",
   extraordinary: "Extraordinary",
 };

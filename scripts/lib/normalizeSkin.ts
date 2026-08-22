@@ -9,6 +9,7 @@ const RARITY_MAP: Record<string, RarityKey> = {
   Restricted: "restricted",
   Classified: "classified",
   Covert: "covert",
+  Contraband: "contraband",
   Extraordinary: "extraordinary",
 };
 

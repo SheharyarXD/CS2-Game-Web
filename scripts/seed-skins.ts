@@ -49,15 +49,21 @@ async function saveColorCache(cache: ColorCache) {
   await writeFile(COLOR_CACHE_PATH, JSON.stringify(cache, null, 2), "utf-8");
 }
 
-function matchesAllowlist(raw: RawSkin): boolean {
+type MatchedRawSkin = RawSkin & {
+  weapon: NonNullable<RawSkin["weapon"]>;
+  pattern: NonNullable<RawSkin["pattern"]>;
+  category: NonNullable<RawSkin["category"]>;
+};
+
+function matchesAllowlist(raw: RawSkin): raw is MatchedRawSkin {
   // A handful of entries are "vanilla" weapons with no special paint
   // (pattern: null) — they can never match a curated skin name, so skip
   // them rather than crash on the null.
-  if (!raw.weapon || !raw.pattern) return false;
+  if (!raw.weapon || !raw.pattern || !raw.category) return false;
+  const weaponName = raw.weapon.name.toLowerCase();
+  const patternName = raw.pattern.name.toLowerCase();
   return POPULAR_SKINS.some(
-    (entry) =>
-      entry.weapon.toLowerCase() === raw.weapon.name.toLowerCase() &&
-      entry.name.toLowerCase() === raw.pattern.name.toLowerCase(),
+    (entry) => entry.weapon.toLowerCase() === weaponName && entry.name.toLowerCase() === patternName,
   );
 }
 

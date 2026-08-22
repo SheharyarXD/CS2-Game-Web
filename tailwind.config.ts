@@ -33,6 +33,7 @@ const config: Config = {
           restricted: "#8847ff",
           classified: "#d32ce6",
           covert: "#eb4b4b",
+          contraband: "#e4ae39",
           extraordinary: "#e4ae39",
         },
       },
