@@ -20,11 +20,13 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
 
   return (
     <div className="tactical-panel border border-base-700">
-      <div className="hidden grid-cols-6 divide-x divide-base-700 border-b border-base-700 bg-base-850 sm:grid">
+      <div className="hidden grid-cols-7 divide-x divide-base-700 border-b border-base-700 bg-base-850 sm:grid">
         {COLUMN_HEADERS.map((header) => (
           <div
             key={header}
-            className="px-3 py-2 text-center font-display text-xs font-semibold uppercase tracking-wider text-neutral-400"
+            className={`px-3 py-2 text-center font-display text-xs font-semibold uppercase tracking-wider text-neutral-400 ${
+              header === "Skin" ? "col-span-2" : ""
+            }`}
           >
             {header}
           </div>
@@ -39,7 +41,7 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-6 sm:gap-0 sm:divide-x sm:divide-base-700 sm:p-0"
+              className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-7 sm:gap-0 sm:divide-x sm:divide-base-700 sm:p-0"
             >
               <div className="col-span-2 flex items-center gap-3 px-2 py-2 sm:px-3 sm:py-3">
                 <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded-sm bg-base-950">
