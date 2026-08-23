@@ -8,7 +8,7 @@ const body = Inter({ subsets: ["latin"], variable: "--font-body" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "CS2 Guessing Game — Skin & Map Dle",
+  title: "CS2 Guessing Game: Skin & Map Dle",
   description: "A daily Counter-Strike 2 skin and map guessing game, inspired by Wordle and Pokedle.",
 };
 

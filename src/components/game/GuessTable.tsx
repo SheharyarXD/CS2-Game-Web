@@ -13,7 +13,7 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
   if (guesses.length === 0) {
     return (
       <div className="tactical-panel border border-dashed border-base-600 px-6 py-10 text-center text-sm text-neutral-500">
-        No guesses yet — search for a skin above to make your first guess.
+        No guesses yet. Search for a skin above to make your first guess.
       </div>
     );
   }

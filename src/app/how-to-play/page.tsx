@@ -16,7 +16,7 @@ export default function HowToPlayPage() {
             <span className="font-semibold text-state-partial-fg">yellow</span> means a related/close match, and{" "}
             <span className="font-semibold text-state-incorrect-fg">red</span> means no match.
           </li>
-          <li>Use clues (case, rarity, color) if you get stuck — each can only be revealed once.</li>
+          <li>Use clues (case, rarity, color) if you get stuck. Each can only be revealed once.</li>
           <li>Daily mode has one shared target for everyone that resets every 24 hours (00:00 UTC). Unlimited mode gives you a new random target every game.</li>
         </ul>
       </section>
@@ -24,7 +24,7 @@ export default function HowToPlayPage() {
       <section className="tactical-panel mt-6 border border-base-700 p-6">
         <h2 className="font-display text-lg font-semibold text-neutral-50">Map Guess</h2>
         <ul className="mt-3 space-y-2 text-sm text-neutral-300">
-          <li>Identify the hidden map from the smallest visible section — you start heavily zoomed in.</li>
+          <li>Identify the hidden map from the smallest visible section. You start heavily zoomed in.</li>
           <li>Every incorrect guess reveals more of the map.</li>
           <li>You have 11 guesses. Guess correctly to win, or see the full map and the answer once you run out.</li>
         </ul>

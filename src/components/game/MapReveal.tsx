@@ -17,7 +17,7 @@ export function MapReveal({ imageUrl, revealPercent, focalX, focalY }: MapReveal
     <div className="tactical-panel relative aspect-square w-full overflow-hidden border-2 border-base-700">
       <motion.img
         src={imageUrl}
-        alt="Zoomed-in section of the target map — identify it before you run out of guesses"
+        alt="Zoomed-in section of the target map, identify it before you run out of guesses"
         className="absolute inset-0 h-full w-full object-cover"
         style={{ transformOrigin: `${focalX}% ${focalY}%` }}
         animate={{ scale }}

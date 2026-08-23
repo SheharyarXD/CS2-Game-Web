@@ -26,7 +26,7 @@ export default function HomePage() {
           href="/maps"
           eyebrow="Map Guess"
           title="How quickly can you identify the map?"
-          description="Start zoomed all the way in. Every wrong guess reveals more of the map — 11 attempts total."
+          description="Start zoomed all the way in. Every wrong guess reveals more of the map, 11 attempts total."
           accent="border-rarity-restricted/50"
         />
       </div>
