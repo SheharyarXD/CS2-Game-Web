@@ -15,6 +15,7 @@ prisma/dev.db-journal
 prisma/prisma/
 data/raw/
 data/cache/
+deliverables/
 .vercel/
 coverage/
 tsconfig.tsbuildinfo

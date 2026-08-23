@@ -125,7 +125,15 @@ export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchPr
                 )}
               >
                 <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded-sm bg-base-950">
-                  <Image src={skin.imageUrl} alt="" fill sizes="56px" className="object-contain" unoptimized />
+                  <Image
+                    src={skin.imageUrl}
+                    alt=""
+                    fill
+                    sizes="56px"
+                    className="object-contain"
+                    unoptimized
+                    loading="eager"
+                  />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-neutral-100">
