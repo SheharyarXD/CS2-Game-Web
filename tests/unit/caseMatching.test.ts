@@ -29,9 +29,18 @@ describe("compareCase", () => {
     ).toBe("incorrect");
   });
 
-  it("returns incorrect when either side has no known case/collection", () => {
+  it("returns incorrect when only one side has no known case/collection", () => {
     expect(
       compareCase({ caseOrCollection: null, caseType: null }, { caseOrCollection: "Chroma Case", caseType: "case" }),
     ).toBe("incorrect");
+  });
+
+  it("returns correct when both sides have no known case/collection", () => {
+    // Regression test: a skin with no case data (e.g. M4A4 | Howl, pulled
+    // from cases entirely) must still score "correct" against itself, or
+    // it becomes an unwinnable target the moment it's picked.
+    expect(compareCase({ caseOrCollection: null, caseType: null }, { caseOrCollection: null, caseType: null })).toBe(
+      "correct",
+    );
   });
 });

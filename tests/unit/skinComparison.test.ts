@@ -51,4 +51,15 @@ describe("compareSkin", () => {
     expect(compareSkin(guess, target).knife).toBe("incorrect");
     expect(compareSkin(makeSkin({ isKnife: true }), target).knife).toBe("correct");
   });
+
+  it("wins even when the target has no known case/collection (e.g. M4A4 | Howl)", () => {
+    const target = makeSkin({
+      displayName: "M4A4 | Howl",
+      rarity: "contraband",
+      caseOrCollection: null,
+      caseType: null,
+    });
+    const result = compareSkin(makeSkin({ displayName: "M4A4 | Howl", rarity: "contraband", caseOrCollection: null, caseType: null }), target);
+    expect(isWinningGuess(result)).toBe(true);
+  });
 });
