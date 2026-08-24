@@ -24,21 +24,24 @@ html {
 }
 
 body {
-  @apply bg-base-950 text-neutral-200 font-body antialiased;
+  @apply bg-steel-950 text-neutral-200 font-body antialiased;
+  /* The CS:GO/CS2 main-menu backdrop: a dark navy-steel gradient with a
+     faint distant glow, not a flat neutral black. */
   background-image:
-    radial-gradient(circle at 20% 0%, rgba(222, 155, 53, 0.06), transparent 45%),
-    linear-gradient(180deg, #0a0c0d 0%, #101314 100%);
+    radial-gradient(circle at 15% 100%, rgba(103, 193, 245, 0.07), transparent 50%),
+    radial-gradient(circle at 85% 0%, rgba(212, 175, 55, 0.05), transparent 45%),
+    linear-gradient(180deg, #0d141d 0%, #0a0f16 55%, #080c11 100%);
   min-height: 100dvh;
 }
 
 ::selection {
-  background: #de9b35;
-  color: #101314;
+  background: #67c1f5;
+  color: #0a0f16;
 }
 
 .tactical-panel {
-  @apply relative bg-base-900 border border-base-700 shadow-panel;
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%);
+  @apply relative bg-steel-850 border border-steel-700 shadow-panel;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 60%);
 }
 
 .tactical-panel::before {
@@ -47,12 +50,12 @@ body {
   inset: 0;
   pointer-events: none;
   background-image: url("/textures/noise.svg");
-  opacity: 0.05;
+  opacity: 0.04;
   mix-blend-mode: overlay;
 }
 
 .focus-ring {
-  @apply outline-none focus-visible:ring-2 focus-visible:ring-accent-orange focus-visible:ring-offset-2 focus-visible:ring-offset-base-950;
+  @apply outline-none focus-visible:ring-2 focus-visible:ring-accent-blue focus-visible:ring-offset-2 focus-visible:ring-offset-steel-950;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -60,7 +63,7 @@ body {
   height: 8px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #33393c;
+  background: #324c60;
   border-radius: 4px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {

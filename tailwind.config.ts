@@ -5,18 +5,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Steam/CS:GO client steel-blue palette (the game's actual chrome
+        // uses a dark navy gradient, not a neutral black), replacing the
+        // earlier neutral "base" scale.
+        steel: {
+          950: "#0a0f16",
+          900: "#0f1620",
+          850: "#141d29",
+          800: "#1a2532",
+          750: "#20303f",
+          700: "#263a4a",
+          600: "#324c60",
+          500: "#456075",
+          400: "#5c7c92",
+        },
+        // Keep "base" as an alias of "steel" so any lingering references
+        // during the reskin still resolve to the new palette.
         base: {
-          950: "#0a0c0d",
-          900: "#101314",
-          850: "#15181a",
-          800: "#1b1f21",
-          700: "#25292c",
-          600: "#33393c",
-          500: "#4a5256",
+          950: "#0a0f16",
+          900: "#0f1620",
+          850: "#141d29",
+          800: "#1a2532",
+          700: "#263a4a",
+          600: "#324c60",
+          500: "#456075",
         },
         accent: {
-          orange: "#de9b35",
-          gold: "#c9a04a",
+          blue: "#67c1f5",
+          "blue-dim": "#4a7ea3",
+          gold: "#d4af37",
+          amber: "#e2a03f",
+          orange: "#e2a03f",
         },
         state: {
           correct: "#4c9a4c",

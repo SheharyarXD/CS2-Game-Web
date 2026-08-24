@@ -137,3 +137,20 @@ model GameGuess {
 
   @@unique([sessionId, guessOrder])
 }
+
+// ---------------------------------------------------------------------------
+// Per-player stats, shown in the sidebar. Keyed by the same anonymous
+// session cookie as GameSession — real, server-computed numbers, never
+// fabricated in the UI. See lib/server/playerStats.ts.
+// ---------------------------------------------------------------------------
+
+model PlayerStats {
+  sessionToken      String   @id
+  gamesPlayed       Int      @default(0) // completed sessions across all modes
+  dailyStreak       Int      @default(0) // consecutive UTC days the daily skin was solved
+  lastDailyDateKey  String? // last "YYYY-MM-DD" the daily was solved on
+  daysPlayed        Int      @default(0) // distinct UTC days with at least one guess
+  lastActiveDateKey String? // last "YYYY-MM-DD" any guess was made on
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

@@ -2,6 +2,7 @@ import { gameConfig } from "@/lib/game/config";
 import { revealPercentForGuessCount } from "@/lib/game/mapGame";
 import { prisma } from "./db";
 import { toNormalizedMap } from "./normalize";
+import { recordActivity, recordGameCompleted } from "./playerStats";
 
 export interface MapGuessEntry {
   guessOrder: number;
@@ -138,6 +139,11 @@ export async function submitMapGuess(
         ]
       : []),
   ]);
+
+  await recordActivity(sessionToken);
+  if (nextStatus !== "IN_PROGRESS") {
+    await recordGameCompleted(sessionToken);
+  }
 
   const refreshed = await loadSession(sessionId);
   return buildStateDTO(refreshed!);

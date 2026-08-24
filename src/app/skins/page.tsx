@@ -10,7 +10,7 @@ export default function SkinModeSelectPage() {
       <div className="mt-10 grid gap-6 sm:grid-cols-2">
         <Link
           href="/skins/daily"
-          className="focus-ring tactical-panel border-2 border-accent-orange/50 p-6 text-left transition-transform hover:-translate-y-0.5"
+          className="focus-ring tactical-panel border-2 border-accent-blue/50 p-6 text-left transition-transform hover:-translate-y-0.5"
         >
           <h2 className="font-display text-xl font-semibold text-neutral-50">Daily Skin</h2>
           <p className="mt-2 text-sm text-neutral-400">

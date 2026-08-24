@@ -5,6 +5,7 @@ import type { ClueKey, SkinComparisonResult } from "@/lib/game/types";
 import { getOrCreateDailySkinId } from "./dailyGame";
 import { prisma } from "./db";
 import { toNormalizedSkin, toSkinSummary, type SkinSummary } from "./normalize";
+import { recordActivity, recordDailyWin, recordGameCompleted } from "./playerStats";
 
 export interface GuessHistoryEntry {
   guessOrder: number;
@@ -167,6 +168,14 @@ export async function submitSkinGuess(
         ]
       : []),
   ]);
+
+  await recordActivity(sessionToken);
+  if (won) {
+    await recordGameCompleted(sessionToken);
+    if (session.mode === "DAILY_SKIN" && session.dateKey) {
+      await recordDailyWin(sessionToken, session.dateKey);
+    }
+  }
 
   const refreshed = await loadSession(sessionId);
   return buildStateDTO(refreshed!);
