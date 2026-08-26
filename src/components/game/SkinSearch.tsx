@@ -101,17 +101,17 @@ export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchPr
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={handleKeyDown}
-        className="focus-ring w-full rounded-sm border border-base-600 bg-base-900 px-4 py-3 text-sm text-neutral-100 placeholder:text-neutral-500 disabled:opacity-50"
+        className="focus-ring w-full border border-[#3c5666] bg-[#0e1922] px-3 py-2 text-[12.5px] text-white placeholder:text-cs-dim2 disabled:opacity-50"
       />
 
       {open && (loading || results.length > 0) && (
         <ul
           id="skin-search-listbox"
           role="listbox"
-          className="tactical-panel scrollbar-thin absolute z-30 mt-1 max-h-80 w-full overflow-y-auto border border-base-600"
+          className="scrollbar-thin absolute z-30 mt-0.5 max-h-80 w-full overflow-y-auto border border-[#3c5666] bg-[#101c23] shadow-lg shadow-black/50"
         >
           {loading && results.length === 0 && (
-            <li className="px-4 py-3 text-sm text-neutral-500">Searching...</li>
+            <li className="px-3 py-2.5 text-[12px] text-cs-dim2">Searching...</li>
           )}
           {results.map((skin, index) => (
             <li key={skin.id} role="option" aria-selected={index === activeIndex}>
@@ -120,11 +120,11 @@ export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchPr
                 onClick={() => select(skin)}
                 onMouseEnter={() => setActiveIndex(index)}
                 className={cn(
-                  "flex w-full items-center gap-3 px-3 py-2 text-left transition-colors",
-                  index === activeIndex ? "bg-base-700" : "hover:bg-base-800",
+                  "flex w-full items-center gap-2.5 px-2.5 py-1.5 text-left transition-colors",
+                  index === activeIndex ? "bg-[#2a4152]" : "hover:bg-[#1d3039]",
                 )}
               >
-                <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded-sm bg-base-950">
+                <span className="relative h-9 w-12 shrink-0 overflow-hidden border border-[#2c4150] bg-[#0a1218]">
                   <Image
                     src={skin.imageUrl}
                     alt=""
@@ -136,10 +136,10 @@ export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchPr
                   />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-neutral-100">
+                  <span className="block truncate text-[12px] font-medium text-white">
                     {skin.weapon} | {skin.name}
                   </span>
-                  <span className="block text-xs text-neutral-500">{RARITY_LABELS[skin.rarity]}</span>
+                  <span className="block text-[10px] text-cs-dim2">{RARITY_LABELS[skin.rarity]}</span>
                 </span>
               </button>
             </li>

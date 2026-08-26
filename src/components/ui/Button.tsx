@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 type Variant = "primary" | "secondary" | "ghost";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-accent-orange text-base-950 hover:bg-accent-orange/90 border-transparent font-semibold",
-  secondary: "bg-base-800 text-neutral-100 hover:bg-base-700 border-base-600",
-  ghost: "bg-transparent text-neutral-300 hover:bg-base-800 border-transparent",
+  primary: "cs-btn-green",
+  secondary: "cs-btn-steel",
+  ghost: "border border-transparent bg-transparent text-cs-dim hover:bg-white/5 hover:text-white",
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,7 +19,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "focus-ring inline-flex items-center justify-center gap-2 rounded-sm border px-4 py-2.5 font-display text-sm font-medium uppercase tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+          "focus-ring inline-flex items-center justify-center gap-2 px-3 py-[6px] font-display text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors disabled:cursor-not-allowed disabled:opacity-50",
           VARIANT_CLASSES[variant],
           className,
         )}

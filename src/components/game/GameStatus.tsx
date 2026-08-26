@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/Button";
 import type { SkinSummary } from "@/lib/server/normalize";
+import { Panel, PanelHead } from "@/components/ui/Panel";
 
 interface GameStatusProps {
   status: "WON" | "LOST";
@@ -19,32 +19,46 @@ export function GameStatus({ status, target, guessCount, mode, nextResetAt, onPl
   const won = status === "WON";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      className={`tactical-panel border-2 p-6 text-center ${won ? "border-state-correct/60" : "border-state-incorrect/60"}`}
-    >
-      <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-neutral-400">
-        {won ? "Target Identified" : "Out of Luck"}
-      </p>
-      <div className="relative mx-auto mt-4 h-32 w-48">
-        <Image src={target.imageUrl} alt={target.displayName} fill sizes="192px" className="object-contain" unoptimized />
-      </div>
-      <h2 className="mt-3 font-display text-2xl font-bold text-neutral-50">
-        {target.weapon} | {target.name}
-      </h2>
-      <p className="mt-2 text-sm text-neutral-400">
-        {won ? `Solved in ${guessCount} guess${guessCount === 1 ? "" : "es"}.` : "Better luck next time."}
-      </p>
-
-      {mode === "daily" && nextResetAt && <DailyCountdown nextResetAt={nextResetAt} />}
-
-      {mode === "unlimited" && onPlayAgain && (
-        <Button className="mt-5" onClick={onPlayAgain}>
-          Play Again
-        </Button>
-      )}
+    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <Panel className={won ? "border-[#3f6b33]" : "border-[#7d3b34]"}>
+        <PanelHead
+          title={won ? "Target Identified" : "Round Over"}
+          right={<span className="text-[10px] uppercase tracking-wide">{mode === "daily" ? "Daily" : "Unlimited"}</span>}
+        />
+        <div className="flex flex-col items-center gap-3 p-4 sm:flex-row sm:items-center sm:gap-4">
+          <div className="relative h-[76px] w-[124px] shrink-0 border border-[#2c4150] bg-[#0e1922]">
+            <Image
+              src={target.imageUrl}
+              alt={target.displayName}
+              fill
+              sizes="124px"
+              className="object-contain"
+              unoptimized
+              loading="eager"
+            />
+          </div>
+          <div className="min-w-0 flex-1 text-center sm:text-left">
+            <p className="font-display text-[18px] font-medium uppercase tracking-wide text-white">
+              {target.weapon} | {target.name}
+            </p>
+            <p className="mt-1 text-[12px] text-cs-dim">
+              {won
+                ? `Solved in ${guessCount} guess${guessCount === 1 ? "" : "es"}.`
+                : "Better luck on the next round."}
+            </p>
+            {mode === "daily" && nextResetAt && <DailyCountdown nextResetAt={nextResetAt} />}
+          </div>
+          {mode === "unlimited" && onPlayAgain && (
+            <button
+              type="button"
+              onClick={onPlayAgain}
+              className="cs-btn-green focus-ring shrink-0 px-4 py-2 font-display text-[11px] font-semibold uppercase tracking-[0.1em]"
+            >
+              Play Again
+            </button>
+          )}
+        </div>
+      </Panel>
     </motion.div>
   );
 }
@@ -59,7 +73,7 @@ function DailyCountdown({ nextResetAt }: { nextResetAt: string }) {
     return () => clearInterval(timer);
   }, []);
 
-  if (now === null) return null; // avoid SSR/client clock mismatch flash
+  if (now === null) return null; // avoid an SSR/client clock mismatch
 
   const diff = Math.max(0, targetMs - now);
   const hours = Math.floor(diff / 3_600_000);
@@ -67,9 +81,9 @@ function DailyCountdown({ nextResetAt }: { nextResetAt: string }) {
   const seconds = Math.floor((diff % 60_000) / 1000);
 
   return (
-    <p className="mt-5 font-display text-sm uppercase tracking-wider text-neutral-400">
+    <p className="mt-1.5 font-display text-[11px] uppercase tracking-wide text-cs-dim2">
       Next daily skin in{" "}
-      <span className="tabular-nums text-accent-orange">
+      <span className="tabular-nums text-cs-amberLt">
         {hours}h {minutes}m {seconds}s
       </span>
     </p>

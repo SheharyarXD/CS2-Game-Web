@@ -28,7 +28,7 @@ export function MatchIcon({ state, className }: { state: MatchState; className?:
 }
 
 export const MATCH_STATE_CLASSES: Record<MatchState, string> = {
-  correct: "bg-state-correct/20 text-state-correct-fg border-state-correct/50",
-  partial: "bg-state-partial/20 text-state-partial-fg border-state-partial/50",
-  incorrect: "bg-state-incorrect/20 text-state-incorrect-fg border-state-incorrect/50",
+  correct: "bg-[#1e3520] text-[#a5d98c] border-[#3f6b33]",
+  partial: "bg-[#31301a] text-[#e3cf76] border-[#7d6f24]",
+  incorrect: "bg-[#301a19] text-[#e0968e] border-[#7d3b34]",
 };

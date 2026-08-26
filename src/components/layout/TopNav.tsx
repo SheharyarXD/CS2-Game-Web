@@ -4,51 +4,70 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { href: "/skins", label: "Skin Guess" },
-  { href: "/maps", label: "Map Guess" },
-  { href: "/how-to-play", label: "How to Play" },
+/**
+ * The client's main-menu tab strip: a horizontally centred cluster of a
+ * home button, evenly sized section tabs separated by bevelled dividers,
+ * and a trailing quit button. The active tab is lit amber.
+ */
+const TABS = [
+  { href: "/skins/daily", label: "Daily", match: ["/skins/daily"] },
+  { href: "/skins/unlimited", label: "Unlimited", match: ["/skins/unlimited"] },
+  { href: "/maps", label: "Maps", match: ["/maps"] },
+  { href: "/skins", label: "Modes", match: ["/skins"] },
+  { href: "/how-to-play", label: "How to Play", match: ["/how-to-play"] },
 ];
 
 export function TopNav() {
   const pathname = usePathname();
+  const isHome = pathname === "/";
 
   return (
-    <header className="sticky top-0 z-40 h-14 shrink-0 border-b border-steel-700 bg-gradient-to-b from-steel-850 to-steel-900 shadow-[0_1px_0_0_rgba(103,193,245,0.08)]">
-      <div className="flex h-full items-stretch">
+    <header className="cs-topbar sticky top-0 z-40 h-10 shrink-0">
+      {/* The tab cluster is a fixed-width group centred in the bar, rather
+          than stretching edge to edge, matching the client's menu. */}
+      <div className="mx-auto flex h-full w-full max-w-[860px] items-stretch">
         <Link
           href="/"
           aria-label="Home"
-          className="focus-ring flex w-14 shrink-0 items-center justify-center border-r border-steel-700 text-neutral-300 transition-colors hover:bg-steel-800 hover:text-accent-blue"
+          aria-current={isHome ? "page" : undefined}
+          className={cn(
+            "cs-tab-divider focus-ring flex w-11 shrink-0 items-center justify-center transition-colors",
+            isHome
+              ? "bg-gradient-to-b from-cs-amberLt to-cs-amber text-[#2b1c05]"
+              : "text-cs-dim hover:bg-white/5 hover:text-cs-text",
+          )}
         >
-          <HomeIcon className="h-5 w-5" />
+          <HomeIcon className="h-[18px] w-[18px]" />
         </Link>
 
-        <nav className="flex items-stretch divide-x divide-steel-700">
-          {NAV_LINKS.map((link) => {
-            const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+        <nav className="flex flex-1 items-stretch">
+          {TABS.map((tab) => {
+            const active = tab.match.some((m) => pathname === m);
             return (
               <Link
-                key={link.href}
-                href={link.href}
+                key={tab.href}
+                href={tab.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "focus-ring flex items-center px-5 font-display text-xs font-semibold uppercase tracking-[0.15em] transition-colors sm:px-7 sm:text-sm",
+                  "cs-tab-divider focus-ring flex flex-1 items-center justify-center px-2 text-center font-display text-[12px] font-medium uppercase leading-none tracking-[0.14em] transition-colors sm:text-[13px]",
                   active
-                    ? "bg-steel-800 text-accent-blue shadow-[inset_0_-2px_0_0_theme(colors.accent.blue)]"
-                    : "text-neutral-400 hover:bg-steel-800/60 hover:text-neutral-100",
+                    ? "bg-gradient-to-b from-[#4d6273] to-[#354856] text-cs-amberLt shadow-[inset_0_-2px_0_0_#c8891f]"
+                    : "text-cs-text/85 hover:bg-white/5 hover:text-white",
                 )}
               >
-                {link.label}
+                {tab.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="ml-auto flex items-center pr-5">
-          <span className="font-display text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-            Guess<span className="text-accent-blue">.CS</span>
-          </span>
-        </div>
+        <Link
+          href="/"
+          aria-label="Leave the current game"
+          className="cs-tab-divider focus-ring flex w-11 shrink-0 items-center justify-center text-cs-dim transition-colors hover:bg-white/5 hover:text-[#d96a5a]"
+        >
+          <PowerIcon className="h-[17px] w-[17px]" />
+        </Link>
       </div>
     </header>
   );
@@ -56,9 +75,25 @@ export function TopNav() {
 
 function HomeIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
-      <path d="M3 11.5 12 4l9 7.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5.5 10v9a1 1 0 0 0 1 1H10v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V20h3.5a1 1 0 0 0 1-1v-9" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M12 3 2.5 11.2h2.8V21h5V15h3.4v6h5v-9.8h2.8L12 3Z" />
+    </svg>
+  );
+}
+
+function PowerIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.1"
+      strokeLinecap="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M12 3.5v8" />
+      <path d="M6.3 6.6a8 8 0 1 0 11.4 0" />
     </svg>
   );
 }

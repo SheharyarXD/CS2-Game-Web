@@ -12,20 +12,20 @@ const COLUMN_HEADERS = ["Skin", "Color", "Wear", "Case", "Rarity", "Knife"];
 export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
   if (guesses.length === 0) {
     return (
-      <div className="tactical-panel border border-dashed border-base-600 px-6 py-10 text-center text-sm text-neutral-500">
+      <p className="px-4 py-8 text-center text-[12px] text-cs-dim2">
         No guesses yet. Search for a skin above to make your first guess.
-      </div>
+      </p>
     );
   }
 
   return (
-    <div className="tactical-panel border border-base-700">
-      <div className="hidden grid-cols-7 divide-x divide-base-700 border-b border-base-700 bg-base-850 sm:grid">
+    <div>
+      <div className="hidden grid-cols-7 border-b border-[#22333d] bg-[#16242c] sm:grid">
         {COLUMN_HEADERS.map((header) => (
           <div
             key={header}
-            className={`px-3 py-2 text-center font-display text-xs font-semibold uppercase tracking-wider text-neutral-400 ${
-              header === "Skin" ? "col-span-2" : ""
+            className={`px-2 py-1.5 text-center font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-cs-dim ${
+              header === "Skin" ? "col-span-2 text-left" : ""
             }`}
           >
             {header}
@@ -33,7 +33,7 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
         ))}
       </div>
 
-      <ul className="divide-y divide-base-700">
+      <ul className="divide-y divide-[#1c2c35]">
         <AnimatePresence initial={false}>
           {[...guesses].reverse().map((guess) => (
             <motion.li
@@ -41,13 +41,21 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className="grid grid-cols-2 gap-2 p-3 sm:grid-cols-7 sm:gap-0 sm:divide-x sm:divide-base-700 sm:p-0"
+              className="grid grid-cols-2 gap-1.5 p-2 sm:grid-cols-7 sm:gap-0 sm:p-0"
             >
-              <div className="col-span-2 flex items-center gap-3 px-2 py-2 sm:px-3 sm:py-3">
-                <span className="relative h-10 w-14 shrink-0 overflow-hidden rounded-sm bg-base-950">
-                  <Image src={guess.skin.imageUrl} alt="" fill sizes="56px" className="object-contain" unoptimized />
+              <div className="col-span-2 flex items-center gap-2.5 px-2 py-2">
+                <span className="relative h-9 w-12 shrink-0 overflow-hidden border border-[#2c4150] bg-[#0e1922]">
+                  <Image
+                    src={guess.skin.imageUrl}
+                    alt=""
+                    fill
+                    sizes="48px"
+                    className="object-contain"
+                    unoptimized
+                    loading="eager"
+                  />
                 </span>
-                <span className="min-w-0 truncate text-sm font-medium text-neutral-100">
+                <span className="min-w-0 truncate text-[12px] text-white">
                   {guess.skin.weapon} | {guess.skin.name}
                 </span>
               </div>
@@ -55,7 +63,7 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
               <ComparisonCell label="Wear" value={WEAR_LABELS[guess.skin.wear]} state={guess.result.wear} delay={0.1} />
               <ComparisonCell
                 label="Case"
-                value={guess.skin.caseOrCollection ?? "Unknown"}
+                value={guess.skin.caseOrCollection ?? "None"}
                 state={guess.result.case}
                 delay={0.15}
               />

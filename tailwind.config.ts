@@ -37,6 +37,31 @@ const config: Config = {
           amber: "#e2a03f",
           orange: "#e2a03f",
         },
+        // Palette sampled from the CS:GO main-menu reference: a desaturated
+        // steel-blue backdrop, near-black navy panels, amber for the active
+        // tab, and the Steam-store green for primary buttons.
+        cs: {
+          bg1: "#8c9ba6",
+          bg2: "#5d707d",
+          bg3: "#33454f",
+          panel: "#16232c",
+          panel2: "#1c2c37",
+          panel3: "#233542",
+          head: "#294050",
+          bar1: "#3c4e5a",
+          bar2: "#2a3946",
+          barLine: "#1b262e",
+          border: "#334855",
+          amber: "#c8891f",
+          amberLt: "#e3a83c",
+          green: "#7aa93c",
+          greenDk: "#587f28",
+          tan: "#b8935a",
+          text: "#cbd6de",
+          dim: "#8b9daa",
+          dim2: "#6b7c88",
+          link: "#6fa8d4",
+        },
         state: {
           correct: "#4c9a4c",
           "correct-fg": "#eafbea",

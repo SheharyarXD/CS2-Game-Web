@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="620" viewBox="0 0 620 620">
+  <!-- Faint emblem watermark sitting behind the menu panels, mirroring the
+       large crest the game client fades into its main-menu backdrop. -->
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.16" stroke-width="3">
+    <circle cx="310" cy="310" r="196" />
+    <circle cx="310" cy="310" r="168" stroke-width="1.5" />
+  </g>
+  <g fill="#ffffff" fill-opacity="0.11">
+    <!-- left wing -->
+    <path d="M300 236 L150 200 L192 246 L128 236 L182 286 L120 284 L196 336 L300 320 Z" />
+    <!-- right wing (mirrored) -->
+    <path d="M320 236 L470 200 L428 246 L492 236 L438 286 L500 284 L424 336 L320 320 Z" />
+    <!-- blade -->
+    <path d="M310 214 L322 268 L322 388 L310 424 L298 388 L298 268 Z" />
+    <!-- crossguard -->
+    <path d="M262 372 L358 372 L358 388 L262 388 Z" />
+    <!-- grip -->
+    <path d="M298 388 L322 388 L318 452 L302 452 Z" />
+  </g>
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="2">
+    <path d="M198 452 Q310 508 422 452" />
+  </g>
+</svg>

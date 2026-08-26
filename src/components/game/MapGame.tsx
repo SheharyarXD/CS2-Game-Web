@@ -5,22 +5,32 @@ import { motion } from "framer-motion";
 import { useMapGame } from "@/hooks/useMapGame";
 import { MapReveal } from "./MapReveal";
 import { MapSelector } from "./MapSelector";
-import { Button } from "@/components/ui/Button";
 import { MatchIcon } from "@/components/ui/MatchIcon";
 import { gameConfig } from "@/lib/game/config";
+import { Panel, PanelHead } from "@/components/ui/Panel";
 
 export function MapGame() {
   const { state, loading, error, submitting, submitGuess, startNewGame } = useMapGame();
 
   if (loading && !state) {
-    return <MapGameSkeleton />;
+    return (
+      <Panel>
+        <PanelHead title="Map Guess" />
+        <div className="animate-pulse p-3">
+          <div className="aspect-[4/3] w-full bg-[#1d2f3a]" />
+        </div>
+      </Panel>
+    );
   }
 
   if (!state) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center text-sm text-neutral-400">
-        {error ?? "Unable to load game."}
-      </div>
+      <Panel>
+        <PanelHead title="Map Guess" />
+        <p role="alert" className="px-4 py-10 text-center text-[12.5px] text-cs-dim">
+          {error ?? "Unable to load the game."}
+        </p>
+      </Panel>
     );
   }
 
@@ -28,91 +38,105 @@ export function MapGame() {
   const guessedIds = state.guesses.map((g) => g.mapId);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
-      <header className="mb-6 text-center">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-accent-orange">Map Guess</p>
-        <h1 className="mt-2 font-display text-3xl font-bold uppercase tracking-tight text-neutral-50">
-          Identify the Map
-        </h1>
-        <p className="mt-2 text-sm text-neutral-400">
-          Guess {state.guesses.length + (isOver ? 0 : 1)} of {gameConfig.mapMode.maxGuesses}
-          {" · "}
-          {state.guessesRemaining} remaining
-        </p>
-      </header>
+    <div className="flex flex-col gap-[6px]">
+      <Panel>
+        <PanelHead
+          title="Map Guess"
+          right={
+            <span className="text-[10px] uppercase tracking-wide">
+              Guess {Math.min(state.guesses.length + (isOver ? 0 : 1), gameConfig.mapMode.maxGuesses)} /{" "}
+              {gameConfig.mapMode.maxGuesses}
+            </span>
+          }
+        />
 
-      <MapReveal
-        imageUrl={state.imageUrl}
-        revealPercent={state.revealPercent}
-        focalX={state.focalX}
-        focalY={state.focalY}
-      />
+        <div className="p-3">
+          {/* Cap the viewport so the map selector stays on screen alongside it. */}
+          <div className="mx-auto w-full max-w-[440px]">
+            <MapReveal
+              imageUrl={state.imageUrl}
+              revealPercent={state.revealPercent}
+              focalX={state.focalX}
+              focalY={state.focalY}
+            />
+          </div>
+
+          <div className="mx-auto mt-2 flex w-full max-w-[440px] items-center gap-2">
+            <div className="cs-rail h-[7px] flex-1">
+              <div
+                className="cs-rail-fill h-full transition-[width] duration-500"
+                style={{ width: `${state.revealPercent}%` }}
+              />
+            </div>
+            <span className="shrink-0 font-mono text-[10px] text-cs-dim">
+              {state.guessesRemaining} left
+            </span>
+          </div>
+        </div>
+      </Panel>
 
       {error && (
-        <p role="alert" className="mt-4 border border-state-incorrect/50 bg-state-incorrect/10 px-3 py-2 text-sm text-state-incorrect-fg">
+        <p role="alert" className="cs-panel border-[#7d3b34] bg-[#2a1715] px-3 py-2 text-[12px] text-[#e0968e]">
           {error}
         </p>
       )}
 
       {isOver && state.target ? (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`tactical-panel mt-6 border-2 p-6 text-center ${
-            state.status === "WON" ? "border-state-correct/60" : "border-state-incorrect/60"
-          }`}
-        >
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.3em] text-neutral-400">
-            {state.status === "WON" ? "Map Identified" : "Out of Guesses"}
-          </p>
-          <div className="relative mx-auto mt-4 h-40 w-full max-w-sm overflow-hidden rounded-sm">
-            <Image src={state.target.imageUrl} alt={state.target.name} fill className="object-cover" unoptimized />
-          </div>
-          <h2 className="mt-3 font-display text-2xl font-bold text-neutral-50">{state.target.name}</h2>
-          <p className="mt-2 text-sm text-neutral-400">
-            {state.status === "WON"
-              ? `Solved in ${state.guesses.length} guess${state.guesses.length === 1 ? "" : "es"}.`
-              : "Better luck on the next map."}
-          </p>
-          <Button className="mt-5" onClick={startNewGame}>
-            Play Again
-          </Button>
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+          <Panel className={state.status === "WON" ? "border-[#3f6b33]" : "border-[#7d3b34]"}>
+            <PanelHead title={state.status === "WON" ? "Map Identified" : "Out of Guesses"} />
+            <div className="flex flex-col items-center gap-3 p-4 sm:flex-row">
+              <div className="relative h-[84px] w-[112px] shrink-0 overflow-hidden border border-[#2c4150]">
+                <Image src={state.target.imageUrl} alt={state.target.name} fill className="object-cover" unoptimized />
+              </div>
+              <div className="min-w-0 flex-1 text-center sm:text-left">
+                <p className="font-display text-[18px] font-medium uppercase tracking-wide text-white">
+                  {state.target.name}
+                </p>
+                <p className="mt-1 text-[12px] text-cs-dim">
+                  {state.status === "WON"
+                    ? `Solved in ${state.guesses.length} guess${state.guesses.length === 1 ? "" : "es"}.`
+                    : "Better luck on the next map."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={startNewGame}
+                className="cs-btn-green focus-ring shrink-0 px-4 py-2 font-display text-[11px] font-semibold uppercase tracking-[0.1em]"
+              >
+                Play Again
+              </button>
+            </div>
+          </Panel>
         </motion.div>
       ) : (
-        <div className="mt-6">
-          <MapSelector onSelect={submitGuess} disabled={submitting} guessedIds={guessedIds} />
-        </div>
+        <Panel>
+          <PanelHead title="Select a Map" />
+          <div className="p-3">
+            <MapSelector onSelect={submitGuess} disabled={submitting} guessedIds={guessedIds} />
+          </div>
+        </Panel>
       )}
 
       {state.guesses.length > 0 && (
-        <ul className="mt-6 space-y-1.5">
-          {[...state.guesses].reverse().map((guess) => (
-            <li
-              key={guess.guessOrder}
-              className={`flex items-center gap-2 border px-3 py-2 text-sm ${
-                guess.correct
-                  ? "border-state-correct/50 bg-state-correct/10 text-state-correct-fg"
-                  : "border-state-incorrect/50 bg-state-incorrect/10 text-state-incorrect-fg"
-              }`}
-            >
-              <MatchIcon state={guess.correct ? "correct" : "incorrect"} />
-              <span className="font-medium">#{guess.guessOrder}</span>
-              <span>{guess.mapName}</span>
-            </li>
-          ))}
-        </ul>
+        <Panel>
+          <PanelHead title="Guess History" />
+          <ul className="divide-y divide-[#1c2c35]">
+            {[...state.guesses].reverse().map((guess) => (
+              <li
+                key={guess.guessOrder}
+                className={`flex items-center gap-2 px-3 py-1.5 text-[12px] ${
+                  guess.correct ? "bg-[#1e3520] text-[#a5d98c]" : "text-cs-dim"
+                }`}
+              >
+                <MatchIcon state={guess.correct ? "correct" : "incorrect"} className="h-3 w-3" />
+                <span className="font-mono text-[10px] text-cs-dim2">#{guess.guessOrder}</span>
+                <span>{guess.mapName}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       )}
-    </div>
-  );
-}
-
-function MapGameSkeleton() {
-  return (
-    <div className="mx-auto max-w-2xl animate-pulse px-4 py-14">
-      <div className="mx-auto h-4 w-32 bg-base-800" />
-      <div className="mx-auto mt-3 h-8 w-64 bg-base-800" />
-      <div className="mt-8 aspect-square w-full bg-base-800" />
-      <div className="mt-6 h-24 w-full bg-base-800" />
     </div>
   );
 }

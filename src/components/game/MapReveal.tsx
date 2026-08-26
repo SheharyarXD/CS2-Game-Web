@@ -14,7 +14,7 @@ export function MapReveal({ imageUrl, revealPercent, focalX, focalY }: MapReveal
   const scale = zoomScaleForRevealPercent(revealPercent);
 
   return (
-    <div className="tactical-panel relative aspect-square w-full overflow-hidden border-2 border-base-700">
+    <div className="relative aspect-[4/3] w-full overflow-hidden border border-[#3c5666] bg-[#0e1922]">
       <motion.img
         src={imageUrl}
         alt="Zoomed-in section of the target map, identify it before you run out of guesses"
@@ -23,7 +23,7 @@ export function MapReveal({ imageUrl, revealPercent, focalX, focalY }: MapReveal
         animate={{ scale }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
       />
-      <div className="pointer-events-none absolute right-2 top-2 rounded-sm bg-base-950/80 px-2 py-1 font-display text-xs font-semibold uppercase tracking-wider text-accent-orange">
+      <div className="pointer-events-none absolute right-1.5 top-1.5 border border-[#3c5666] bg-black/70 px-1.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-wider text-cs-amberLt">
         {Math.round(revealPercent)}% revealed
       </div>
     </div>
