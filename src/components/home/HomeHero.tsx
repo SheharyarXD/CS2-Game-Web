@@ -97,7 +97,7 @@ export async function HomeHero() {
 
           <ul className="mt-3 space-y-1 text-[12px] text-cs-dim">
             <li>&#8226; Color, wear, case, rarity and knife status are compared on every guess.</li>
-            <li>&#8226; Stuck? Reveal the case, rarity or color clue — one use each.</li>
+            <li>&#8226; Stuck? Reveal the case, rarity or color clue, one use each.</li>
             <li>&#8226; In Map Guess you get 11 attempts, and each miss uncovers more of the map.</li>
           </ul>
         </div>
