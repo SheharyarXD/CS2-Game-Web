@@ -122,7 +122,7 @@ export function AgentPicker({
         <div className="scrollbar-thin grid flex-1 grid-cols-3 gap-1.5 overflow-y-auto p-3 sm:grid-cols-5 md:grid-cols-6">
           {agents === null &&
             Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="aspect-[3/4] animate-pulse bg-[#1d2f3a]" />
+              <div key={i} className="h-[148px] animate-pulse bg-[#1d2f3a]" />
             ))}
 
           {agents !== null && visible.length === 0 && (
@@ -141,7 +141,9 @@ export function AgentPicker({
                 onClick={() => choose(a.id)}
                 title={a.shortName}
                 className={cn(
-                  "focus-ring group relative aspect-[3/4] overflow-hidden border transition-colors disabled:opacity-60",
+                  // Explicit height rather than an aspect ratio: the source
+                  // portraits vary in proportion and were overflowing the cell.
+                  "focus-ring group relative block h-[148px] w-full overflow-hidden border bg-[#0e1922] transition-colors disabled:opacity-60",
                   active ? "border-cs-amber" : "border-[#2c4150] hover:border-[#6f92a8]",
                 )}
               >
@@ -150,7 +152,8 @@ export function AgentPicker({
                   alt={a.shortName}
                   fill
                   sizes="120px"
-                  className="object-cover"
+                  // Anchor to the top so the agent's face stays in frame.
+                  className="object-cover object-top"
                   unoptimized
                   loading="lazy"
                 />
