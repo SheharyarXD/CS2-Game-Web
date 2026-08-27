@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareSkin, isWinningGuess } from "@/lib/game/skinComparison";
+import { allAttributesMatch, compareSkin } from "@/lib/game/skinComparison";
 import type { NormalizedSkin } from "@/lib/game/types";
 
 function makeSkin(overrides: Partial<NormalizedSkin> = {}): NormalizedSkin {
@@ -14,6 +14,7 @@ function makeSkin(overrides: Partial<NormalizedSkin> = {}): NormalizedSkin {
     caseType: "case",
     wear: "field_tested",
     color: "red",
+    weaponCategory: "rifle",
     isKnife: false,
     isGlove: false,
     ...overrides,
@@ -22,44 +23,50 @@ function makeSkin(overrides: Partial<NormalizedSkin> = {}): NormalizedSkin {
 
 describe("compareSkin", () => {
   it("marks every attribute correct for an identical skin", () => {
-    const target = makeSkin();
-    const result = compareSkin(makeSkin(), target);
+    const result = compareSkin(makeSkin(), makeSkin());
     expect(result).toEqual({
-      color: "correct",
       wear: "correct",
-      case: "correct",
+      collection: "correct",
       rarity: "correct",
-      knife: "correct",
+      weaponType: "correct",
     });
-    expect(isWinningGuess(result)).toBe(true);
+    expect(allAttributesMatch(result)).toBe(true);
   });
 
   it("scores each attribute independently", () => {
-    const target = makeSkin({ color: "red", wear: "field_tested", rarity: "covert", caseOrCollection: "Chroma Case" });
-    const guess = makeSkin({ color: "orange", wear: "minimal_wear", rarity: "classified", caseOrCollection: "Gamma Case" });
+    const target = makeSkin({ wear: "field_tested", rarity: "covert", caseOrCollection: "Chroma Case" });
+    const guess = makeSkin({ wear: "minimal_wear", rarity: "classified", caseOrCollection: "Gamma Case" });
     const result = compareSkin(guess, target);
-    expect(result.color).toBe("partial");
     expect(result.wear).toBe("partial");
     expect(result.rarity).toBe("partial");
-    expect(result.case).toBe("incorrect");
-    expect(isWinningGuess(result)).toBe(false);
+    expect(result.collection).toBe("incorrect");
+    expect(allAttributesMatch(result)).toBe(false);
   });
 
-  it("compares knife status as a strict boolean, independent of other attributes", () => {
-    const target = makeSkin({ isKnife: true });
-    const guess = makeSkin({ isKnife: false });
-    expect(compareSkin(guess, target).knife).toBe("incorrect");
-    expect(compareSkin(makeSkin({ isKnife: true }), target).knife).toBe("correct");
+  it("does not compare colour, which was retired as a category", () => {
+    const result = compareSkin(makeSkin({ color: "blue" }), makeSkin({ color: "red" }));
+    expect(result).not.toHaveProperty("color");
+    expect(allAttributesMatch(result)).toBe(true);
   });
 
-  it("wins even when the target has no known case/collection (e.g. M4A4 | Howl)", () => {
-    const target = makeSkin({
+  it("still matches every attribute when the target has no known collection", () => {
+    const howl = makeSkin({
       displayName: "M4A4 | Howl",
+      weapon: "M4A4",
       rarity: "contraband",
       caseOrCollection: null,
       caseType: null,
     });
-    const result = compareSkin(makeSkin({ displayName: "M4A4 | Howl", rarity: "contraband", caseOrCollection: null, caseType: null }), target);
-    expect(isWinningGuess(result)).toBe(true);
+    expect(allAttributesMatch(compareSkin(howl, howl))).toBe(true);
+  });
+
+  it("can report all four attributes matching for two genuinely different skins", () => {
+    // This is why the win condition is decided by skin identity rather than
+    // by the comparison result. Two rifles from the same collection at the
+    // same rarity and wear score all-correct without being the same skin.
+    const target = makeSkin({ id: "skin-a", weapon: "AK-47", name: "Redline" });
+    const other = makeSkin({ id: "skin-b", weapon: "AK-47", name: "Point Disarray" });
+    expect(allAttributesMatch(compareSkin(other, target))).toBe(true);
+    expect(other.id).not.toBe(target.id);
   });
 });

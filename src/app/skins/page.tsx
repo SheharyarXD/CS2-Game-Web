@@ -1,23 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import { Panel, PanelHead } from "@/components/ui/Panel";
+import { useT } from "@/lib/i18n/SettingsProvider";
 
 export default function SkinModeSelectPage() {
+  const t = useT();
+
   return (
     <Panel>
-      <PanelHead title="Skin Guess" right={<span className="text-[10px] uppercase tracking-wide">Select a mode</span>} />
+      <PanelHead title={t("nav.skins")} />
       <div className="grid gap-2 p-3 sm:grid-cols-2">
         <ModeCard
           href="/skins/daily"
-          title="Daily Skin"
-          body="One shared target for every player, rotating at 00:00 UTC. Your progress is kept if you refresh."
-          cta="Play Daily"
+          title={t("mode.dailySkin")}
+          body={t("mode.dailySkinBody")}
+          cta={t("home.playDaily")}
           accent="border-[#547187]"
         />
         <ModeCard
           href="/skins/unlimited"
-          title="Unlimited"
-          body="A new random skin every round with no cap on how many you play. Perfect for practice."
-          cta="Start Round"
+          title={t("mode.unlimited")}
+          body={t("mode.unlimitedBody")}
+          cta={t("mode.startRound")}
           accent="border-[#2c4150]"
         />
       </div>

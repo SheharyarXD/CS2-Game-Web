@@ -2,10 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Typeface: the game's own UI font (Stratum2) is proprietary and cannot be
+  redistributed, so the interface uses Saira Condensed for headings and
+  labels and Saira for body copy. Both are squared-off technical
+  grotesques with the same narrow, uppercase-friendly proportions, which
+  is what gives the client's menus their look.
+*/
 :root {
-  --font-display: "Oswald", "Arial Narrow", sans-serif;
-  --font-body: "Inter", "Segoe UI", sans-serif;
+  --font-display: "Saira Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Saira", "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", Consolas, monospace;
+
+  /* Result palette. Overridden wholesale by colorblind mode below. */
+  --state-correct-text: #a5d98c;
+  --state-correct-bg: #1e3520;
+  --state-correct-border: #3f6b33;
+  --state-partial-text: #e3cf76;
+  --state-partial-bg: #31301a;
+  --state-partial-border: #7d6f24;
+  --state-incorrect-text: #e0968e;
+  --state-incorrect-bg: #301a19;
+  --state-incorrect-border: #7d3b34;
+}
+
+/*
+  Colorblind mode swaps the red/green pairing for blue/orange, which stays
+  distinguishable under all common forms of colour vision deficiency. The
+  tick / wave / cross icons are always shown regardless, so colour is never
+  the only signal.
+*/
+:root[data-colorblind="on"] {
+  --state-correct-text: #7fc4ff;
+  --state-correct-bg: #12293a;
+  --state-correct-border: #2f6d9e;
+  --state-partial-text: #ffd28a;
+  --state-partial-bg: #33270f;
+  --state-partial-border: #9a6b1e;
+  --state-incorrect-text: #b9c4cc;
+  --state-incorrect-bg: #22292e;
+  --state-incorrect-border: #4d5a63;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -19,26 +55,69 @@
   }
 }
 
+/*
+  The menu backdrop is built in three stacked layers:
+    html            -> the steel-blue field gradient
+    body::before    -> the Counter-Terrorist crest watermark
+    body::after     -> slow-drifting fog
+  The gradient lives on <html> rather than <body> so the two pseudo
+  elements (which sit at a negative z-index) still paint above it; a
+  background on <body> itself would hide them completely.
+*/
 html {
   color-scheme: dark;
+  background-color: #55697b;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 50% 38%, rgba(203, 219, 231, 0.55) 0%, rgba(130, 150, 165, 0) 72%),
+    linear-gradient(180deg, #9db0bd 0%, #7f929f 38%, #5c6f7e 72%, #3b4d5b 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
 }
 
-/* The menu backdrop: a desaturated steel-blue field, brightest behind the
-   centre of the screen and falling off to the edges, with a faint emblem
-   watermark sitting behind every panel. */
 body {
   @apply font-body text-cs-text antialiased;
-  background-color: #7d8e9a;
-  background-image:
-    url("/textures/menu-emblem.svg"),
-    radial-gradient(ellipse 75% 65% at 50% 40%, rgba(190, 205, 216, 0.55) 0%, rgba(130, 150, 165, 0) 70%),
-    linear-gradient(180deg, #93a4b0 0%, #7c8d9a 40%, #5d707d 75%, #46596600 100%),
-    linear-gradient(180deg, #8b9ca8 0%, #55697600 100%);
-  background-repeat: no-repeat;
-  background-position: center 44%, center, center, center;
-  background-size: 760px auto, cover, cover, cover;
-  background-attachment: fixed;
+  position: relative;
+  background: transparent;
   min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* CT crest watermark. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: url("/textures/ct-logo.svg");
+  background-repeat: no-repeat;
+  background-position: center 44%;
+  background-size: 720px auto;
+  opacity: 0.85;
+}
+
+/* Drifting fog. Two bands at different speeds give the haze depth. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("/textures/fog.svg"), url("/textures/fog.svg");
+  background-repeat: repeat-x, repeat-x;
+  background-size: 1400px auto, 2100px auto;
+  opacity: 0.7;
+  animation: fog-drift 120s linear infinite;
+}
+
+@keyframes fog-drift {
+  from {
+    background-position: 0 22%, 0 66%;
+  }
+  to {
+    background-position: 1400px 22%, -2100px 66%;
+  }
 }
 
 ::selection {
@@ -48,37 +127,51 @@ body {
 
 /* ---- Panel chrome ------------------------------------------------------ */
 
-/* A menu panel: near-black navy, slightly translucent so the backdrop
-   emblem shows through, with a 1px lighter edge. */
+/*
+  A menu panel. The drop shadow plus the light top edge and dark bottom
+  edge is what lifts the boxes off the backdrop.
+*/
 .cs-panel {
-  background: rgba(19, 31, 39, 0.9);
-  border: 1px solid rgba(70, 96, 110, 0.55);
+  position: relative;
+  background: linear-gradient(180deg, rgba(26, 41, 52, 0.94) 0%, rgba(17, 28, 36, 0.95) 100%);
+  border: 1px solid rgba(88, 118, 136, 0.55);
+  box-shadow:
+    0 10px 26px -6px rgba(0, 0, 0, 0.65),
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
 }
 
-/* The lighter title strip that sits at the top of a panel. */
+/* The lighter title strip at the top of a panel. */
 .cs-panel-head {
-  background: linear-gradient(180deg, #33485a 0%, #263846 100%);
-  border-bottom: 1px solid rgba(12, 20, 26, 0.9);
+  background: linear-gradient(180deg, #3a5265 0%, #2a3f4f 55%, #223441 100%);
+  border-bottom: 1px solid rgba(10, 17, 22, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* The top navigation bar. */
 .cs-topbar {
-  background: linear-gradient(180deg, #46596a 0%, #33454f 55%, #2a3944 100%);
-  border-bottom: 2px solid #16222a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(180deg, #4c6274 0%, #35495a 55%, #2a3b49 100%);
+  border-bottom: 2px solid #131e26;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .cs-tab-divider {
   box-shadow:
-    inset 1px 0 0 rgba(255, 255, 255, 0.07),
-    inset -1px 0 0 rgba(0, 0, 0, 0.45);
+    inset 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset -1px 0 0 rgba(0, 0, 0, 0.5);
 }
 
 /* Steam-store style green action button. */
 .cs-btn-green {
   background: linear-gradient(180deg, #8cbe45 0%, #6d9a2f 52%, #5c8626 100%);
   color: #17240c;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 .cs-btn-green:hover {
   background: linear-gradient(180deg, #9bcd50 0%, #7aa93c 52%, #689430 100%);
@@ -87,27 +180,100 @@ body {
 .cs-btn-tan {
   background: linear-gradient(180deg, #c8a670 0%, #a8834c 100%);
   color: #241a09;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 .cs-btn-tan:hover {
   background: linear-gradient(180deg, #d6b57f 0%, #b8935a 100%);
 }
 
 .cs-btn-steel {
-  background: linear-gradient(180deg, #3f5666 0%, #2c3f4c 100%);
-  border: 1px solid rgba(110, 140, 158, 0.4);
+  background: linear-gradient(180deg, #445d6f 0%, #2e4351 100%);
+  border: 1px solid rgba(120, 152, 172, 0.45);
   color: #cbd6de;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 .cs-btn-steel:hover {
-  background: linear-gradient(180deg, #4c6779 0%, #364c5b 100%);
+  background: linear-gradient(180deg, #53707f 0%, #375062 100%);
 }
 
-/* Rank / XP progress rail. */
+/* Level / reveal progress rail. */
 .cs-rail {
-  background: #0e181e;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  background: #0b141a;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 .cs-rail-fill {
-  background: linear-gradient(180deg, #e0a63a 0%, #c8891f 100%);
+  background: linear-gradient(180deg, #eab949 0%, #c8891f 100%);
+  box-shadow: 0 0 8px rgba(226, 160, 63, 0.5);
+}
+
+/* ---- Result cells ------------------------------------------------------ */
+
+.state-correct {
+  color: var(--state-correct-text);
+  background: var(--state-correct-bg);
+  border-color: var(--state-correct-border);
+}
+.state-partial {
+  color: var(--state-partial-text);
+  background: var(--state-partial-bg);
+  border-color: var(--state-partial-border);
+}
+.state-incorrect {
+  color: var(--state-incorrect-text);
+  background: var(--state-incorrect-bg);
+  border-color: var(--state-incorrect-border);
+}
+
+/*
+  Rare Special Item (knives and gloves) is rendered as real metallic gold
+  rather than a flat tint: a vertical bronze -> gold -> highlight ramp
+  matching the in-game medal art, with a sheen that sweeps across it.
+*/
+.rarity-gold {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(
+    180deg,
+    #6d5210 0%,
+    #a87f1c 18%,
+    #d9b23c 42%,
+    #f5e39a 52%,
+    #d4a92f 64%,
+    #9c7418 86%,
+    #6d5210 100%
+  );
+  color: #3a2b06;
+  text-shadow: 0 1px 0 rgba(255, 244, 205, 0.55);
+  border-color: #8f6b18 !important;
+}
+
+.rarity-gold::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 248, 214, 0) 35%,
+    rgba(255, 250, 226, 0.75) 50%,
+    rgba(255, 248, 214, 0) 65%
+  );
+  background-size: 260% 100%;
+  animation: rarity-shimmer 3.4s ease-in-out infinite;
+}
+
+@keyframes rarity-shimmer {
+  0%,
+  100% {
+    background-position: 160% 0;
+  }
+  50% {
+    background-position: -60% 0;
+  }
 }
 
 .focus-ring {

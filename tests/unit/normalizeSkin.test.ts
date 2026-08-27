@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyRareSpecialItem,
   cleanDisplayName,
   deterministicIndex,
   mapRarity,
@@ -20,6 +21,24 @@ describe("mapRarity / mapWear", () => {
   it("returns null for unrecognized names instead of guessing", () => {
     expect(mapRarity("Ultra Rare")).toBeNull();
     expect(mapWear("Brand New")).toBeNull();
+  });
+});
+
+describe("applyRareSpecialItem", () => {
+  it("forces knives to the gold Rare Special Item tier", () => {
+    // The dataset labels knife finishes Covert; the category must win.
+    expect(applyRareSpecialItem("covert", "knife")).toBe("extraordinary");
+  });
+
+  it("forces gloves to the gold tier too", () => {
+    expect(applyRareSpecialItem("covert", "gloves")).toBe("extraordinary");
+    expect(applyRareSpecialItem("extraordinary", "gloves")).toBe("extraordinary");
+  });
+
+  it("leaves ordinary weapon rarities untouched", () => {
+    expect(applyRareSpecialItem("covert", "rifle")).toBe("covert");
+    expect(applyRareSpecialItem("milspec", "pistol")).toBe("milspec");
+    expect(applyRareSpecialItem("contraband", "rifle")).toBe("contraband");
   });
 });
 

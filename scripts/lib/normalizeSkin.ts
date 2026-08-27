@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { CaseType, RarityKey, WearKey } from "@/lib/game/types";
+import type { CaseType, RarityKey, WeaponCategory, WearKey } from "@/lib/game/types";
 import type { RawSkin } from "./rawSkinTypes";
 
 const RARITY_MAP: Record<string, RarityKey> = {
@@ -27,6 +27,21 @@ export function mapRarity(name: string): RarityKey | null {
 
 export function mapWear(name: string): WearKey | null {
   return WEAR_MAP[name] ?? null;
+}
+
+/**
+ * In game, every knife and every pair of gloves is a "Rare Special Item"
+ * — the gold tier — regardless of the finish applied to it.
+ *
+ * The upstream dataset instead labels knife finishes with the rarity of
+ * the *pattern* (almost all Covert), which would render a Karambit red
+ * rather than gold. The item category therefore overrides the pattern
+ * rarity here. Gloves already arrive as Extraordinary, but are included
+ * so the rule is explicit rather than incidental.
+ */
+export function applyRareSpecialItem(rarity: RarityKey, category: WeaponCategory): RarityKey {
+  if (category === "knife" || category === "gloves") return "extraordinary";
+  return rarity;
 }
 
 /** Deterministic [0, size) index derived from a string — stable across runs/machines. */

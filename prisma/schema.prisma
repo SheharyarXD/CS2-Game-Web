@@ -29,8 +29,9 @@ model Skin {
   caseType     String? // "case" | "collection" | null (no known source)
   wear         String // canonical normalized wear for this skin, see lib/game/wearMatching.ts
   availableWears String // JSON-encoded string[] of all wear names this skin can drop in (display/reference only)
-  color        String // normalized color bucket, see lib/game/colorMatching.ts
+  color        String // dominant colour derived from the skin render (kept for reference; no longer compared)
   colorSource  String // "image" | "fallback" — how `color` was derived (documents provenance)
+  weaponCategory String @default("rifle") // weapon family, see lib/game/weaponMatching.ts
   // Lowercased "weapon | name" used for case-insensitive search. Prisma's
   // `mode: "insensitive"` filter only works on Postgres/MySQL, not SQLite —
   // this column keeps search portable across both providers.
@@ -146,11 +147,43 @@ model GameGuess {
 
 model PlayerStats {
   sessionToken      String   @id
-  gamesPlayed       Int      @default(0) // completed sessions across all modes
+  gamesPlayed       Int      @default(0) // completed sessions across all modes, lifetime
   dailyStreak       Int      @default(0) // consecutive UTC days the daily skin was solved
   lastDailyDateKey  String? // last "YYYY-MM-DD" the daily was solved on
   daysPlayed        Int      @default(0) // distinct UTC days with at least one guess
   lastActiveDateKey String? // last "YYYY-MM-DD" any guess was made on
+
+  // Profile levelling. `gamesTowardLevel` resets when the player reaches
+  // max level and is awarded that year's service medal; see
+  // lib/game/playerRank.ts.
+  gamesTowardLevel  Int      @default(0)
+  serviceMedals     String   @default("[]") // JSON-encoded number[] of years earned
+
+  // Chosen agent avatar (Agent.id), null until the player picks one.
+  agentId           String?
+  agent             Agent?   @relation(fields: [agentId], references: [id])
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Playable agent portraits offered in the profile picture picker. Imported
+// from the same upstream dataset as the skins — see scripts/seed-agents.ts.
+// ---------------------------------------------------------------------------
+
+model Agent {
+  id        String   @id
+  name      String // full name including the collection suffix
+  shortName String // name without the " | Collection" suffix
+  imageUrl  String
+  team      String // "Terrorist" | "Counter-Terrorist"
+  rarity    String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  players   PlayerStats[]
+
+  @@index([active])
 }

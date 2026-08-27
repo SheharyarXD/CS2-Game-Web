@@ -12,7 +12,16 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { extractDominantColor } from "./lib/extractDominantColor";
-import { cleanDisplayName, mapRarity, pickCanonicalWear, pickCaseOrCollection } from "./lib/normalizeSkin";
+import {
+  applyRareSpecialItem,
+  cleanDisplayName,
+  mapRarity,
+  pickCanonicalWear,
+  pickCaseOrCollection,
+} from "./lib/normalizeSkin";
+// Relative rather than the "@/" alias: this runs under tsx, which does not
+// apply the tsconfig path mapping to runtime value imports.
+import { mapWeaponCategory } from "../src/lib/game/weaponMatching";
 import type { RawSkin } from "./lib/rawSkinTypes";
 import { POPULAR_SKINS } from "./data/popularSkinsAllowlist";
 
@@ -104,10 +113,14 @@ async function main() {
   let skippedInvalid = 0;
 
   for (const [index, raw] of matched.entries()) {
-    const rarity = mapRarity(raw.rarity.name);
+    const sourceRarity = mapRarity(raw.rarity.name);
     const wear = pickCanonicalWear(raw.id, raw.wears);
-    if (!rarity || !wear) {
-      console.warn(`  ! skipping ${raw.name}: unmapped rarity/wear (${raw.rarity.name} / wears=${raw.wears.length})`);
+    const weaponCategory = mapWeaponCategory(raw.category.name);
+    const rarity = sourceRarity && weaponCategory ? applyRareSpecialItem(sourceRarity, weaponCategory) : null;
+    if (!rarity || !wear || !weaponCategory) {
+      console.warn(
+        `  ! skipping ${raw.name}: unmapped rarity/wear/category (${raw.rarity.name} / wears=${raw.wears.length} / ${raw.category.name})`,
+      );
       skippedInvalid += 1;
       continue;
     }
@@ -131,6 +144,7 @@ async function main() {
       availableWears: JSON.stringify(raw.wears.map((w) => w.name)),
       color,
       colorSource: source,
+      weaponCategory,
       searchText,
       isKnife,
       isGlove,

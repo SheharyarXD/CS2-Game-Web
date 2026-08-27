@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { gameConfig } from "@/lib/game/config";
+import { useT } from "@/lib/i18n/SettingsProvider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -19,44 +21,50 @@ interface ModeCard {
   art: React.ReactNode;
 }
 
-const CARDS: ModeCard[] = [
-  {
-    href: "/skins/daily",
-    badge: "DAILY",
-    badgeTone: "bg-[#c0392b]",
-    title: "Daily Skin",
-    body: "One hidden skin, the same target for every player. Resets at 00:00 UTC.",
-    cta: "Play Daily",
-    art: <CaseArt tone="#c8891f" />,
-  },
-  {
-    href: "/skins/unlimited",
-    badge: "NEW ROUND",
-    badgeTone: "bg-[#587f28]",
-    title: "Unlimited Skins",
-    body: "A fresh random skin every round, with no limit on how many you play.",
-    cta: "Start Round",
-    art: <CaseArt tone="#6fa8d4" />,
-  },
-  {
-    href: "/maps",
-    badge: "11 GUESSES",
-    badgeTone: "bg-[#2f6fae]",
-    title: "Map Guess",
-    body: "Identify the map from a heavily zoomed view. Every miss reveals more.",
-    cta: "Identify Map",
-    art: <MapArt />,
-  },
-];
-
 export function ModeCarousel() {
+  const t = useT();
   const [lead, setLead] = useState(0);
 
+  const CARDS: ModeCard[] = useMemo(
+    () => [
+      {
+        href: "/skins/daily",
+        badge: t("nav.daily"),
+        badgeTone: "bg-[#c0392b]",
+        title: t("mode.dailySkin"),
+        body: t("mode.dailySkinBody"),
+        cta: t("home.playDaily"),
+        art: <CaseArt tone="#c8891f" />,
+      },
+      {
+        href: "/skins/unlimited",
+        badge: t("nav.unlimited"),
+        badgeTone: "bg-[#587f28]",
+        title: t("mode.unlimitedSkins"),
+        body: t("mode.unlimitedBody"),
+        cta: t("mode.startRound"),
+        art: <CaseArt tone="#6fa8d4" />,
+      },
+      {
+        href: "/maps",
+        // Short badge: the full "11 guesses per round" line overflows the card.
+        badge: t("game.guesses", { count: gameConfig.mapMode.maxGuesses }),
+        badgeTone: "bg-[#2f6fae]",
+        title: t("mode.mapGuess"),
+        body: t("mode.mapGuessBody"),
+        cta: t("mode.identifyMap"),
+        art: <MapArt />,
+      },
+    ],
+    [t],
+  );
+
   // Advance the lead card the way the client's promo strip rotates.
+  const cardCount = CARDS.length;
   useEffect(() => {
-    const timer = setInterval(() => setLead((i) => (i + 1) % CARDS.length), 7000);
+    const timer = setInterval(() => setLead((i) => (i + 1) % cardCount), 7000);
     return () => clearInterval(timer);
-  }, []);
+  }, [cardCount]);
 
   const ordered = [...CARDS.slice(lead), ...CARDS.slice(0, lead)];
 

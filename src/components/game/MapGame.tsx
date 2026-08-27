@@ -8,16 +8,18 @@ import { MapSelector } from "./MapSelector";
 import { MatchIcon } from "@/components/ui/MatchIcon";
 import { gameConfig } from "@/lib/game/config";
 import { Panel, PanelHead } from "@/components/ui/Panel";
+import { useT } from "@/lib/i18n/SettingsProvider";
 
 export function MapGame() {
   const { state, loading, error, submitting, submitGuess, startNewGame } = useMapGame();
+  const t = useT();
 
   if (loading && !state) {
     return (
       <Panel>
-        <PanelHead title="Map Guess" />
+        <PanelHead title={t("map.title")} />
         <div className="animate-pulse p-3">
-          <div className="aspect-[4/3] w-full bg-[#1d2f3a]" />
+          <div className="mx-auto aspect-[4/3] w-full max-w-[560px] bg-[#1d2f3a]" />
         </div>
       </Panel>
     );
@@ -26,9 +28,9 @@ export function MapGame() {
   if (!state) {
     return (
       <Panel>
-        <PanelHead title="Map Guess" />
+        <PanelHead title={t("map.title")} />
         <p role="alert" className="px-4 py-10 text-center text-[12.5px] text-cs-dim">
-          {error ?? "Unable to load the game."}
+          {error ?? t("game.loadError")}
         </p>
       </Panel>
     );
@@ -36,41 +38,39 @@ export function MapGame() {
 
   const isOver = state.status !== "IN_PROGRESS";
   const guessedIds = state.guesses.map((g) => g.mapId);
+  const current = Math.min(state.guesses.length + (isOver ? 0 : 1), gameConfig.mapMode.maxGuesses);
 
   return (
     <div className="flex flex-col gap-[6px]">
       <Panel>
         <PanelHead
-          title="Map Guess"
+          title={t("map.title")}
           right={
             <span className="text-[10px] uppercase tracking-wide">
-              Guess {Math.min(state.guesses.length + (isOver ? 0 : 1), gameConfig.mapMode.maxGuesses)} /{" "}
-              {gameConfig.mapMode.maxGuesses}
+              {t("map.guessOf", { current, total: gameConfig.mapMode.maxGuesses })}
             </span>
           }
         />
 
         <div className="p-3">
-          {/* Cap the viewport so the map selector stays on screen alongside it. */}
-          <div className="mx-auto w-full max-w-[440px]">
+          <div className="mx-auto w-full max-w-[560px]">
             <MapReveal
               imageUrl={state.imageUrl}
               revealPercent={state.revealPercent}
               focalX={state.focalX}
               focalY={state.focalY}
             />
-          </div>
-
-          <div className="mx-auto mt-2 flex w-full max-w-[440px] items-center gap-2">
-            <div className="cs-rail h-[7px] flex-1">
-              <div
-                className="cs-rail-fill h-full transition-[width] duration-500"
-                style={{ width: `${state.revealPercent}%` }}
-              />
+            <div className="mt-2 flex items-center gap-2">
+              <div className="cs-rail h-[7px] flex-1">
+                <div
+                  className="cs-rail-fill h-full transition-[width] duration-500"
+                  style={{ width: `${state.revealPercent}%` }}
+                />
+              </div>
+              <span className="shrink-0 font-mono text-[10px] text-cs-dim">
+                {t("map.left", { count: state.guessesRemaining })}
+              </span>
             </div>
-            <span className="shrink-0 font-mono text-[10px] text-cs-dim">
-              {state.guessesRemaining} left
-            </span>
           </div>
         </div>
       </Panel>
@@ -84,19 +84,21 @@ export function MapGame() {
       {isOver && state.target ? (
         <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
           <Panel className={state.status === "WON" ? "border-[#3f6b33]" : "border-[#7d3b34]"}>
-            <PanelHead title={state.status === "WON" ? "Map Identified" : "Out of Guesses"} />
+            <PanelHead title={state.status === "WON" ? t("map.identified") : t("map.outOfGuesses")} />
             <div className="flex flex-col items-center gap-3 p-4 sm:flex-row">
-              <div className="relative h-[84px] w-[112px] shrink-0 overflow-hidden border border-[#2c4150]">
+              <div className="relative h-[120px] w-[160px] shrink-0 overflow-hidden border border-[#2c4150]">
                 <Image src={state.target.imageUrl} alt={state.target.name} fill className="object-cover" unoptimized />
               </div>
               <div className="min-w-0 flex-1 text-center sm:text-left">
-                <p className="font-display text-[18px] font-medium uppercase tracking-wide text-white">
+                <p className="font-display text-[19px] font-medium uppercase tracking-wide text-white">
                   {state.target.name}
                 </p>
                 <p className="mt-1 text-[12px] text-cs-dim">
                   {state.status === "WON"
-                    ? `Solved in ${state.guesses.length} guess${state.guesses.length === 1 ? "" : "es"}.`
-                    : "Better luck on the next map."}
+                    ? state.guesses.length === 1
+                      ? t("game.solvedInOne")
+                      : t("game.solvedIn", { count: state.guesses.length })
+                    : t("map.betterLuck")}
                 </p>
               </div>
               <button
@@ -104,14 +106,14 @@ export function MapGame() {
                 onClick={startNewGame}
                 className="cs-btn-green focus-ring shrink-0 px-4 py-2 font-display text-[11px] font-semibold uppercase tracking-[0.1em]"
               >
-                Play Again
+                {t("game.playAgain")}
               </button>
             </div>
           </Panel>
         </motion.div>
       ) : (
         <Panel>
-          <PanelHead title="Select a Map" />
+          <PanelHead title={t("map.selectMap")} />
           <div className="p-3">
             <MapSelector onSelect={submitGuess} disabled={submitting} guessedIds={guessedIds} />
           </div>
@@ -120,13 +122,13 @@ export function MapGame() {
 
       {state.guesses.length > 0 && (
         <Panel>
-          <PanelHead title="Guess History" />
+          <PanelHead title={t("game.guessHistory")} />
           <ul className="divide-y divide-[#1c2c35]">
             {[...state.guesses].reverse().map((guess) => (
               <li
                 key={guess.guessOrder}
                 className={`flex items-center gap-2 px-3 py-1.5 text-[12px] ${
-                  guess.correct ? "bg-[#1e3520] text-[#a5d98c]" : "text-cs-dim"
+                  guess.correct ? "state-correct" : "text-cs-dim"
                 }`}
               >
                 <MatchIcon state={guess.correct ? "correct" : "incorrect"} className="h-3 w-3" />

@@ -2,9 +2,9 @@ import type { MatchState } from "@/lib/game/types";
 import { cn } from "@/lib/utils";
 
 /**
- * Icons that mirror the color states so information is never conveyed by
- * color alone (checkmark / tilde / cross read the same to colorblind users
- * and screen readers via the accompanying aria-label).
+ * Icons that mirror the colour states so information is never conveyed by
+ * colour alone — this is what makes colorblind mode work alongside the
+ * palette swap, and what screen readers announce via the label.
  */
 export function MatchIcon({ state, className }: { state: MatchState; className?: string }) {
   const label = state === "correct" ? "Correct" : state === "partial" ? "Partial match" : "Incorrect";
@@ -27,8 +27,13 @@ export function MatchIcon({ state, className }: { state: MatchState; className?:
   );
 }
 
+/**
+ * Result cell colours. The actual values live in CSS custom properties so
+ * colorblind mode can swap the whole palette in one place — see
+ * :root[data-colorblind="on"] in globals.css.
+ */
 export const MATCH_STATE_CLASSES: Record<MatchState, string> = {
-  correct: "bg-[#1e3520] text-[#a5d98c] border-[#3f6b33]",
-  partial: "bg-[#31301a] text-[#e3cf76] border-[#7d6f24]",
-  incorrect: "bg-[#301a19] text-[#e0968e] border-[#7d3b34]",
+  correct: "state-correct",
+  partial: "state-partial",
+  incorrect: "state-incorrect",
 };

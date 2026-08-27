@@ -1,4 +1,5 @@
 import { dateKeyUTC } from "@/lib/game/dailyTarget";
+import { GAMES_TO_MAX_LEVEL } from "@/lib/game/playerRank";
 import { prisma } from "./db";
 
 /**
@@ -11,6 +12,10 @@ export interface PlayerStatsDTO {
   gamesPlayed: number;
   dailyStreak: number;
   daysPlayed: number;
+  gamesTowardLevel: number;
+  serviceMedals: number[];
+  hasCurrentYearMedal: boolean;
+  agent: { id: string; shortName: string; imageUrl: string; team: string } | null;
 }
 
 function isYesterday(dateKey: string, candidateYesterday: string): boolean {
@@ -39,12 +44,40 @@ export async function recordActivity(sessionToken: string): Promise<void> {
   }
 }
 
-/** Call once when any game session (skin or map, daily or unlimited) reaches WON/LOST. */
+/**
+ * Call once when any game session reaches WON/LOST.
+ *
+ * Also advances profile levelling: reaching max level resets the level
+ * counter and awards the current year's service medal. Once that medal is
+ * held, the counter keeps climbing (no further reset) until the calendar
+ * year rolls over and the next year's medal becomes available.
+ */
 export async function recordGameCompleted(sessionToken: string): Promise<void> {
-  await prisma.playerStats.upsert({
+  const year = new Date().getUTCFullYear();
+  const existing = await prisma.playerStats.findUnique({ where: { sessionToken } });
+
+  if (!existing) {
+    await prisma.playerStats.create({
+      data: { sessionToken, gamesPlayed: 1, gamesTowardLevel: 1 },
+    });
+    return;
+  }
+
+  const medals = JSON.parse(existing.serviceMedals) as number[];
+  const hasThisYear = medals.includes(year);
+  const nextTowardLevel = existing.gamesTowardLevel + 1;
+
+  // Award the medal and reset the level only while this year's medal is
+  // still outstanding.
+  const earnsMedal = !hasThisYear && nextTowardLevel >= GAMES_TO_MAX_LEVEL;
+
+  await prisma.playerStats.update({
     where: { sessionToken },
-    update: { gamesPlayed: { increment: 1 } },
-    create: { sessionToken, gamesPlayed: 1 },
+    data: {
+      gamesPlayed: existing.gamesPlayed + 1,
+      gamesTowardLevel: earnsMedal ? 0 : nextTowardLevel,
+      serviceMedals: earnsMedal ? JSON.stringify([...medals, year]) : existing.serviceMedals,
+    },
   });
 }
 
@@ -76,10 +109,42 @@ export async function recordDailyWin(sessionToken: string, dateKey: string = dat
 }
 
 export async function getPlayerStats(sessionToken: string): Promise<PlayerStatsDTO> {
-  const stats = await prisma.playerStats.findUnique({ where: { sessionToken } });
+  const stats = await prisma.playerStats.findUnique({
+    where: { sessionToken },
+    include: { agent: true },
+  });
+
+  const year = new Date().getUTCFullYear();
+  const medals = stats ? (JSON.parse(stats.serviceMedals) as number[]) : [];
+
   return {
     gamesPlayed: stats?.gamesPlayed ?? 0,
     dailyStreak: stats?.dailyStreak ?? 0,
     daysPlayed: stats?.daysPlayed ?? 0,
+    gamesTowardLevel: stats?.gamesTowardLevel ?? 0,
+    serviceMedals: medals,
+    hasCurrentYearMedal: medals.includes(year),
+    agent: stats?.agent
+      ? {
+          id: stats.agent.id,
+          shortName: stats.agent.shortName,
+          imageUrl: stats.agent.imageUrl,
+          team: stats.agent.team,
+        }
+      : null,
   };
+}
+
+/** Sets the player's chosen agent portrait. Validates the agent exists. */
+export async function setPlayerAgent(sessionToken: string, agentId: string): Promise<PlayerStatsDTO> {
+  const agent = await prisma.agent.findUnique({ where: { id: agentId, active: true } });
+  if (!agent) throw new Error("Unknown agent.");
+
+  await prisma.playerStats.upsert({
+    where: { sessionToken },
+    update: { agentId },
+    create: { sessionToken, agentId },
+  });
+
+  return getPlayerStats(sessionToken);
 }

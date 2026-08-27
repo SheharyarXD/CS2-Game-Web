@@ -1,5 +1,13 @@
 import type { Skin as PrismaSkin, GameMap as PrismaMap } from "@prisma/client";
-import type { CaseType, ColorKey, NormalizedMap, NormalizedSkin, RarityKey, WearKey } from "@/lib/game/types";
+import type {
+  CaseType,
+  ColorKey,
+  NormalizedMap,
+  NormalizedSkin,
+  RarityKey,
+  WeaponCategory,
+  WearKey,
+} from "@/lib/game/types";
 
 /** Maps a Prisma Skin row to the plain domain type the comparison engine consumes. */
 export function toNormalizedSkin(skin: PrismaSkin): NormalizedSkin {
@@ -14,6 +22,7 @@ export function toNormalizedSkin(skin: PrismaSkin): NormalizedSkin {
     caseType: skin.caseType as CaseType,
     wear: skin.wear as WearKey,
     color: skin.color as ColorKey,
+    weaponCategory: skin.weaponCategory as WeaponCategory,
     isKnife: skin.isKnife,
     isGlove: skin.isGlove,
   };
@@ -42,11 +51,10 @@ export interface SkinSummary {
   name: string;
   imageUrl: string;
   rarity: RarityKey;
-  color: ColorKey;
   wear: WearKey;
   caseOrCollection: string | null;
   caseType: CaseType;
-  isKnife: boolean;
+  weaponCategory: WeaponCategory;
 }
 
 export function toSkinSummary(skin: PrismaSkin): SkinSummary {
@@ -57,10 +65,9 @@ export function toSkinSummary(skin: PrismaSkin): SkinSummary {
     name: skin.name,
     imageUrl: skin.imageUrl,
     rarity: skin.rarity as RarityKey,
-    color: skin.color as ColorKey,
     wear: skin.wear as WearKey,
     caseOrCollection: skin.caseOrCollection,
     caseType: skin.caseType as CaseType,
-    isKnife: skin.isKnife,
+    weaponCategory: skin.weaponCategory as WeaponCategory,
   };
 }

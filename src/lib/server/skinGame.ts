@@ -1,6 +1,6 @@
 import { gameConfig } from "@/lib/game/config";
 import { dateKeyUTC, msUntilNextUtcMidnight } from "@/lib/game/dailyTarget";
-import { compareSkin, isWinningGuess } from "@/lib/game/skinComparison";
+import { compareSkin } from "@/lib/game/skinComparison";
 import type { ClueKey, SkinComparisonResult } from "@/lib/game/types";
 import { getOrCreateDailySkinId } from "./dailyGame";
 import { prisma } from "./db";
@@ -17,6 +17,10 @@ export interface ClueState {
   key: ClueKey;
   revealed: boolean;
   value: string | null;
+  /** Guesses that must be submitted before this clue can be revealed. */
+  unlocksAfter: number;
+  /** False while the player still owes guesses before it becomes available. */
+  unlocked: boolean;
 }
 
 export interface SkinGameStateDTO {
@@ -60,11 +64,15 @@ async function buildStateDTO(
     }));
 
   const cluesUsed = JSON.parse(session.cluesUsed) as ClueKey[];
-  const target = toNormalizedSkin(session.targetSkin);
-  const clues: ClueState[] = gameConfig.skinMode.clues.map((key) => {
+  const clues: ClueState[] = gameConfig.skinMode.clues.map(({ key, unlocksAfter }) => {
     const revealed = cluesUsed.includes(key);
-    const value = revealed ? cluePayload(key, session.targetSkin) : null;
-    return { key, revealed, value };
+    return {
+      key,
+      revealed,
+      value: revealed ? cluePayload(key, session.targetSkin) : null,
+      unlocksAfter,
+      unlocked: guesses.length >= unlocksAfter,
+    };
   });
 
   const isOver = session.status !== "IN_PROGRESS";
@@ -81,10 +89,13 @@ async function buildStateDTO(
   };
 }
 
-function cluePayload(key: ClueKey, skin: { caseOrCollection: string | null; rarity: string; color: string }): string {
-  if (key === "case") return skin.caseOrCollection ?? "Unknown";
+function cluePayload(
+  key: ClueKey,
+  skin: { caseOrCollection: string | null; rarity: string; wear: string },
+): string {
+  if (key === "collection") return skin.caseOrCollection ?? "No collection";
   if (key === "rarity") return skin.rarity;
-  return skin.color;
+  return skin.wear;
 }
 
 export async function getOrStartDailySession(sessionToken: string): Promise<SkinGameStateDTO> {
@@ -147,7 +158,9 @@ export async function submitSkinGuess(
   }
 
   const result = compareSkin(toNormalizedSkin(guessedSkin), toNormalizedSkin(session.targetSkin));
-  const won = isWinningGuess(result);
+  // The win is decided by skin identity, never by the comparison result:
+  // with four attributes, two distinct skins can share all of them.
+  const won = guessedSkin.id === session.targetSkinId;
   const guessOrder = session.guesses.length + 1;
 
   await prisma.$transaction([
@@ -190,8 +203,14 @@ export async function activateClue(
   if (!session || session.sessionToken !== sessionToken) {
     throw new Error("Game session not found.");
   }
-  if (!gameConfig.skinMode.clues.includes(clueKey)) {
+  const clueConfig = gameConfig.skinMode.clues.find((c) => c.key === clueKey);
+  if (!clueConfig) {
     throw new Error("Unknown clue key.");
+  }
+  // Gate server-side as well as in the UI, so the unlock threshold can't
+  // be bypassed by calling the endpoint directly.
+  if (session.guesses.length < clueConfig.unlocksAfter) {
+    throw new Error(`This clue unlocks after ${clueConfig.unlocksAfter} guesses.`);
   }
 
   const cluesUsed = JSON.parse(session.cluesUsed) as ClueKey[];

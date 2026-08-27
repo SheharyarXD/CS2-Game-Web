@@ -2,6 +2,13 @@
 // Prisma's generated types so the comparison engine is a pure, portable
 // module (see skinComparison.ts) that can be unit tested without a database.
 
+/**
+ * Retained because the importer still derives a dominant colour for every
+ * skin (see scripts/lib/extractDominantColor.ts). Colour is no longer one
+ * of the compared attributes — skins vary too widely in palette for it to
+ * be a fair category — but the data stays on the record so the category
+ * could be reinstated without a re-import.
+ */
 export type ColorKey =
   | "red"
   | "orange"
@@ -34,6 +41,9 @@ export type RarityKey =
   | "contraband"
   | "extraordinary";
 
+/** Broad weapon family, used for the partial match on weapon type. */
+export type WeaponCategory = "rifle" | "pistol" | "smg" | "heavy" | "knife" | "gloves";
+
 export type CaseType = "case" | "collection" | null;
 
 /** A normalized, game-ready skin. This is what the comparison engine operates on. */
@@ -48,25 +58,28 @@ export interface NormalizedSkin {
   caseType: CaseType;
   wear: WearKey;
   color: ColorKey;
+  weaponCategory: WeaponCategory;
   isKnife: boolean;
   isGlove: boolean;
 }
 
 export type MatchState = "correct" | "partial" | "incorrect";
-export type BinaryMatchState = "correct" | "incorrect";
 
+/**
+ * The compared attributes, in the order they are shown to the player:
+ * wear, collection, rarity, weapon type.
+ */
 export interface SkinComparisonResult {
-  color: MatchState;
   wear: MatchState;
-  case: MatchState;
+  collection: MatchState;
   rarity: MatchState;
-  knife: BinaryMatchState;
+  weaponType: MatchState;
 }
 
 export type GameMode = "DAILY_SKIN" | "UNLIMITED_SKIN" | "MAP";
 export type GameStatus = "IN_PROGRESS" | "WON" | "LOST";
 
-export type ClueKey = "case" | "rarity" | "color";
+export type ClueKey = "wear" | "rarity" | "collection";
 
 export interface NormalizedMap {
   id: string;

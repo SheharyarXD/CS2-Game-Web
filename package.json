@@ -19,7 +19,8 @@
     "seed:skins": "tsx scripts/seed-skins.ts",
     "generate:map-art": "tsx scripts/generate-placeholder-maps.ts",
     "seed:maps": "tsx scripts/seed-maps.ts",
-    "seed": "npm run seed:skins && npm run generate:map-art && npm run seed:maps"
+    "seed:agents": "tsx scripts/seed-agents.ts",
+    "seed": "npm run seed:skins && npm run seed:agents && npm run generate:map-art && npm run seed:maps"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

@@ -4,7 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { SkinSummary } from "@/lib/server/normalize";
-import { RARITY_LABELS } from "@/lib/game/config";
+import { RARITY_COLORS, RARITY_LABELS } from "@/lib/game/config";
+import { useT } from "@/lib/i18n/SettingsProvider";
 import { cn } from "@/lib/utils";
 
 interface SkinSearchProps {
@@ -14,6 +15,7 @@ interface SkinSearchProps {
 }
 
 export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchProps) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SkinSummary[]>([]);
   const [open, setOpen] = useState(false);
@@ -93,7 +95,7 @@ export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchPr
         aria-autocomplete="list"
         autoComplete="off"
         disabled={disabled}
-        placeholder="Search by weapon or skin name..."
+        placeholder={t("game.searchPlaceholder")}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -111,7 +113,7 @@ export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchPr
           className="scrollbar-thin absolute z-30 mt-0.5 max-h-80 w-full overflow-y-auto border border-[#3c5666] bg-[#101c23] shadow-lg shadow-black/50"
         >
           {loading && results.length === 0 && (
-            <li className="px-3 py-2.5 text-[12px] text-cs-dim2">Searching...</li>
+            <li className="px-3 py-2.5 text-[12px] text-cs-dim2">{t("game.searching")}</li>
           )}
           {results.map((skin, index) => (
             <li key={skin.id} role="option" aria-selected={index === activeIndex}>
@@ -139,7 +141,9 @@ export function SkinSearch({ onSelect, disabled, excludeIds = [] }: SkinSearchPr
                   <span className="block truncate text-[12px] font-medium text-white">
                     {skin.weapon} | {skin.name}
                   </span>
-                  <span className="block text-[10px] text-cs-dim2">{RARITY_LABELS[skin.rarity]}</span>
+                  <span className="block text-[10px]" style={{ color: RARITY_COLORS[skin.rarity].text }}>
+                    {RARITY_LABELS[skin.rarity]}
+                  </span>
                 </span>
               </button>
             </li>

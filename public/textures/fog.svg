@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="600" viewBox="0 0 1400 600">
+  <!--
+    Soft fog band. Tiles horizontally, so the left and right edges fade to
+    fully transparent and the seam is invisible while it drifts.
+  -->
+  <defs>
+    <radialGradient id="puff" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#dce7ef" stop-opacity="0.30" />
+      <stop offset="55%" stop-color="#c9d8e3" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#c9d8e3" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="edgeFade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#000" stop-opacity="0" />
+      <stop offset="12%" stop-color="#000" stop-opacity="1" />
+      <stop offset="88%" stop-color="#000" stop-opacity="1" />
+      <stop offset="100%" stop-color="#000" stop-opacity="0" />
+    </linearGradient>
+    <mask id="fade">
+      <rect width="1400" height="600" fill="url(#edgeFade)" />
+    </mask>
+  </defs>
+
+  <g mask="url(#fade)">
+    <ellipse cx="180" cy="300" rx="300" ry="120" fill="url(#puff)" />
+    <ellipse cx="470" cy="240" rx="360" ry="150" fill="url(#puff)" />
+    <ellipse cx="760" cy="330" rx="320" ry="130" fill="url(#puff)" />
+    <ellipse cx="1050" cy="250" rx="380" ry="160" fill="url(#puff)" />
+    <ellipse cx="1300" cy="330" rx="290" ry="120" fill="url(#puff)" />
+  </g>
+</svg>

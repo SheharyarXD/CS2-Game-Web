@@ -1,83 +1,72 @@
 /**
- * Rank and medal derivation.
+ * Profile levelling and service medals.
  *
- * The menu's player card has slots for a rank, a progress rail and a row
- * of medals. Every value here is derived deterministically from the
- * player's REAL recorded stats (see lib/server/playerStats.ts) — a fresh
- * player genuinely sits at the first rank with zero medals lit. Nothing
- * on the card is decorative filler.
+ * Mirrors the game's own progression: a player climbs profile levels, and
+ * on reaching the top level their level resets and they are awarded that
+ * calendar year's Service Medal. Once the year's medal has been earned the
+ * level keeps climbing without resetting again until the new year begins,
+ * at which point the next year's medal becomes available.
  *
- * Thresholds live here so they can be retuned without touching the UI.
+ * Every value is derived from the player's REAL recorded activity (see
+ * lib/server/playerStats.ts) — a new player genuinely starts at level 1
+ * with no medals. Thresholds live here so they can be retuned without
+ * touching any UI.
  */
 
-export interface PlayerStatsInput {
-  gamesPlayed: number;
-  dailyStreak: number;
-  daysPlayed: number;
+export const MAX_LEVEL = 40;
+
+/** Games needed to advance one level. */
+export const GAMES_PER_LEVEL = 3;
+
+export interface LevelInput {
+  /** Games completed since the last level reset. */
+  gamesTowardLevel: number;
+  /** Whether this player already holds the current year's service medal. */
+  hasCurrentYearMedal: boolean;
 }
 
-export interface RankTier {
-  name: string;
-  /** Games needed to enter this tier. */
-  at: number;
-}
-
-export const RANK_TIERS: RankTier[] = [
-  { name: "Recruit", at: 0 },
-  { name: "Private", at: 3 },
-  { name: "Corporal", at: 8 },
-  { name: "Sergeant", at: 15 },
-  { name: "Lieutenant", at: 25 },
-  { name: "Captain", at: 40 },
-  { name: "Major", at: 60 },
-  { name: "Colonel", at: 85 },
-  { name: "Brigadier", at: 115 },
-  { name: "Elite", at: 150 },
-];
-
-export interface RankProgress {
-  tierIndex: number;
-  tierName: string;
-  nextTierName: string | null;
-  /** 0-100, progress through the current tier toward the next one. */
+export interface LevelProgress {
+  level: number;
+  /** 0-100 progress through the current level. */
   percent: number;
-  gamesIntoTier: number;
-  gamesNeededForTier: number;
+  gamesIntoLevel: number;
+  gamesPerLevel: number;
+  /** True once the player is at max level and has not yet been awarded the medal. */
+  atMaxLevel: boolean;
 }
 
-export function getRankProgress(gamesPlayed: number): RankProgress {
-  let tierIndex = 0;
-  for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
-    if (gamesPlayed >= RANK_TIERS[i]!.at) {
-      tierIndex = i;
-      break;
-    }
-  }
+export function getLevelProgress({ gamesTowardLevel, hasCurrentYearMedal }: LevelInput): LevelProgress {
+  const rawLevel = Math.floor(gamesTowardLevel / GAMES_PER_LEVEL) + 1;
 
-  const current = RANK_TIERS[tierIndex]!;
-  const next = RANK_TIERS[tierIndex + 1] ?? null;
+  // Before the year's medal is earned the level is capped at MAX_LEVEL,
+  // which is the point the reset and award happen. Afterwards it climbs
+  // freely for the rest of the year.
+  const level = hasCurrentYearMedal ? rawLevel : Math.min(rawLevel, MAX_LEVEL);
+  const gamesIntoLevel = gamesTowardLevel % GAMES_PER_LEVEL;
+  const atMaxLevel = !hasCurrentYearMedal && level >= MAX_LEVEL;
 
-  if (!next) {
-    return {
-      tierIndex,
-      tierName: current.name,
-      nextTierName: null,
-      percent: 100,
-      gamesIntoTier: gamesPlayed - current.at,
-      gamesNeededForTier: 0,
-    };
-  }
-
-  const span = next.at - current.at;
-  const into = gamesPlayed - current.at;
   return {
-    tierIndex,
-    tierName: current.name,
-    nextTierName: next.name,
-    percent: Math.max(0, Math.min(100, Math.round((into / span) * 100))),
-    gamesIntoTier: into,
-    gamesNeededForTier: span,
+    level,
+    percent: atMaxLevel ? 100 : Math.round((gamesIntoLevel / GAMES_PER_LEVEL) * 100),
+    gamesIntoLevel,
+    gamesPerLevel: GAMES_PER_LEVEL,
+    atMaxLevel,
   };
+}
+
+/**
+ * How many completed games are required to reach max level, i.e. the point
+ * at which the level resets and the year's service medal is awarded.
+ */
+export const GAMES_TO_MAX_LEVEL = (MAX_LEVEL - 1) * GAMES_PER_LEVEL;
+
+export interface ServiceMedal {
+  year: number;
+  label: string;
+}
+
+export function serviceMedalFor(year: number): ServiceMedal {
+  return { year, label: `${year} Service Medal` };
 }
 
 export interface Medal {
@@ -86,8 +75,14 @@ export interface Medal {
   earned: boolean;
 }
 
-/** The six medal slots on the player card, lit only when actually earned. */
-export function getMedals(stats: PlayerStatsInput): Medal[] {
+export interface MedalInput {
+  gamesPlayed: number;
+  dailyStreak: number;
+  daysPlayed: number;
+}
+
+/** Achievement slots on the player card, lit only when actually earned. */
+export function getMedals(stats: MedalInput): Medal[] {
   return [
     { key: "first-game", label: "Finish your first game", earned: stats.gamesPlayed >= 1 },
     { key: "streak-3", label: "3 day daily streak", earned: stats.dailyStreak >= 3 },

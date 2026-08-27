@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="660" height="660" viewBox="0 0 660 660">
+  <!--
+    Counter-Terrorist style crest: an eagle over a shield, drawn from
+    scratch as an original approximation of the faction emblem the client
+    fades into its menu backdrop.
+  -->
+  <defs>
+    <linearGradient id="crest" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.30" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.12" />
+    </linearGradient>
+  </defs>
+
+  <g fill="none" stroke="url(#crest)" stroke-width="3">
+    <circle cx="330" cy="330" r="238" />
+    <circle cx="330" cy="330" r="212" stroke-width="1.5" />
+  </g>
+
+  <g fill="url(#crest)">
+    <!-- eagle head -->
+    <path d="M330 128c-15 0-27 11-27 25 0 8 4 15 10 19l-6 12 23-6 23 6-6-12c6-4 10-11 10-19 0-14-12-25-27-25Zm13 20a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
+
+    <!-- left wing -->
+    <path d="M300 190 152 168l38 40-66-10 52 44-64-4 74 48-70 6 84 36 296-2Z" opacity="0.75" />
+    <!-- right wing -->
+    <path d="M360 190 508 168l-38 40 66-10-52 44 64-4-74 48 70 6-84 36-296-2Z" opacity="0.75" />
+
+    <!-- shield -->
+    <path d="M330 252 200 288v96c0 76 52 132 130 156 78-24 130-80 130-156v-96l-130-36Zm0 34 96 27v71c0 57-38 100-96 120-58-20-96-63-96-120v-71l96-27Z" />
+
+    <!-- shield inner star -->
+    <path d="m330 322 17 37 40 5-30 27 8 40-35-20-35 20 8-40-30-27 40-5Z" opacity="0.9" />
+  </g>
+
+  <!-- laurel sweep beneath -->
+  <g fill="none" stroke="url(#crest)" stroke-width="4" stroke-linecap="round">
+    <path d="M176 470q154 96 308 0" />
+    <path d="M206 500q124 70 248 0" opacity="0.6" />
+  </g>
+</svg>

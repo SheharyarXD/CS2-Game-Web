@@ -6,10 +6,12 @@ import { GuessTable } from "./GuessTable";
 import { CluePanel } from "./CluePanel";
 import { GameStatus } from "./GameStatus";
 import { Panel, PanelHead } from "@/components/ui/Panel";
+import { useT } from "@/lib/i18n/SettingsProvider";
 
 export function SkinGame({ mode }: { mode: SkinGameMode }) {
   const { state, loading, error, submitting, submitGuess, activateClue, startNewGame } = useSkinGame(mode);
-  const title = mode === "daily" ? "Daily Skin" : "Unlimited Skins";
+  const t = useT();
+  const title = mode === "daily" ? t("mode.dailySkin") : t("mode.unlimitedSkins");
 
   if (loading && !state) {
     return <SkinGameSkeleton title={title} />;
@@ -20,7 +22,7 @@ export function SkinGame({ mode }: { mode: SkinGameMode }) {
       <Panel>
         <PanelHead title={title} />
         <p role="alert" className="px-4 py-10 text-center text-[12.5px] text-cs-dim">
-          {error ?? "Unable to load the game."}
+          {error ?? t("game.loadError")}
         </p>
       </Panel>
     );
@@ -28,23 +30,22 @@ export function SkinGame({ mode }: { mode: SkinGameMode }) {
 
   const isOver = state.status !== "IN_PROGRESS";
   const guessedIds = state.guesses.map((g) => g.skin.id);
+  const count = state.guesses.length;
+  const countLabel = count === 1 ? t("game.guessOne") : t("game.guesses", { count });
 
   return (
     <div className="flex flex-col gap-[6px]">
       <Panel>
         <PanelHead
           title={title}
-          right={
-            <span className="text-[10px] uppercase tracking-wide">
-              {state.guesses.length} guess{state.guesses.length === 1 ? "" : "es"}
-            </span>
-          }
+          right={<span className="text-[10px] uppercase tracking-wide">{countLabel}</span>}
         />
 
         <div className="border-b border-[#22333d] bg-[#101c23] px-3 py-2.5">
           {isOver ? (
             <p className="text-[12px] text-cs-dim">
-              This round is complete. {mode === "daily" ? "A new skin unlocks at 00:00 UTC." : "Start another round below."}
+              {t("game.roundComplete")}{" "}
+              {mode === "daily" ? t("game.newSkinAt") : t("game.startAnother")}
             </p>
           ) : (
             <SkinSearch disabled={submitting} excludeIds={guessedIds} onSelect={(skin) => submitGuess(skin.id)} />
@@ -55,10 +56,7 @@ export function SkinGame({ mode }: { mode: SkinGameMode }) {
       </Panel>
 
       {error && (
-        <p
-          role="alert"
-          className="cs-panel border-[#7d3b34] bg-[#2a1715] px-3 py-2 text-[12px] text-[#e0968e]"
-        >
+        <p role="alert" className="cs-panel border-[#7d3b34] bg-[#2a1715] px-3 py-2 text-[12px] text-[#e0968e]">
           {error}
         </p>
       )}
@@ -67,7 +65,7 @@ export function SkinGame({ mode }: { mode: SkinGameMode }) {
         <GameStatus
           status={state.status as "WON" | "LOST"}
           target={state.target}
-          guessCount={state.guesses.length}
+          guessCount={count}
           mode={mode}
           nextResetAt={state.nextResetAt}
           onPlayAgain={mode === "unlimited" ? startNewGame : undefined}
@@ -75,7 +73,7 @@ export function SkinGame({ mode }: { mode: SkinGameMode }) {
       )}
 
       <Panel>
-        <PanelHead title="Guess History" />
+        <PanelHead title={t("game.guessHistory")} />
         <GuessTable guesses={state.guesses} />
       </Panel>
     </div>
@@ -93,7 +91,6 @@ function SkinGameSkeleton({ title }: { title: string }) {
         </div>
       </Panel>
       <Panel>
-        <PanelHead title="Guess History" />
         <div className="animate-pulse p-3">
           <div className="h-24 w-full bg-[#1d2f3a]" />
         </div>
