@@ -6,6 +6,11 @@ import type { ClueKey } from "@/lib/game/types";
 
 const UNLIMITED_STORAGE_KEY = "cs2_unlimited_skin_session";
 
+/**
+ * Only the session id is kept in the browser, never the target. The
+ * server owns the target, the guess history and the clue state, so
+ * nothing here can be edited to reveal or change the answer.
+ */
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init);
   if (!res.ok) {
@@ -112,5 +117,14 @@ export function useSkinGame(mode: SkinGameMode) {
     }
   }, [mode]);
 
-  return { state, loading, error, submitting, submitGuess, activateClue, startNewGame };
+  /**
+   * Re-fetch from the server. Used when the daily reset passes while the
+   * tab is open: the server picks the new day's target, so simply asking
+   * again is all that's needed to move the player onto it.
+   */
+  const refresh = useCallback(() => {
+    init();
+  }, [init]);
+
+  return { state, loading, error, submitting, submitGuess, activateClue, startNewGame, refresh };
 }

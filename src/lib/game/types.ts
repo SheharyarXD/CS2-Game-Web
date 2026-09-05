@@ -79,7 +79,12 @@ export interface SkinComparisonResult {
 export type GameMode = "DAILY_SKIN" | "UNLIMITED_SKIN" | "MAP";
 export type GameStatus = "IN_PROGRESS" | "WON" | "LOST";
 
-export type ClueKey = "wear" | "rarity" | "collection";
+/**
+ * Clue order is fixed by the agreed spec: Case/Collection, then Rarity,
+ * then Colour. Colour is a clue only — it is deliberately not one of the
+ * compared attributes (see SkinComparisonResult).
+ */
+export type ClueKey = "collection" | "rarity" | "color";
 
 export interface NormalizedMap {
   id: string;

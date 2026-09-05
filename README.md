@@ -35,24 +35,40 @@ running CS2 game client — it's a fully independent browser game.
 ## Gameplay rules
 
 **Skin Guess** — search for and guess a CS2 skin. Each guess is compared against a hidden target across
-five attributes:
+four attributes, shown in this order:
 
 | Attribute | Exact match | Partial match | Rule |
 |---|---|---|---|
-| Color | Green | Yellow | Adjacent on a defined color wheel (see `src/lib/game/colorMatching.ts`) |
 | Wear | Green | Yellow | Adjacent tier on the FN→BS scale (see `src/lib/game/wearMatching.ts`) |
-| Rarity | Green | Yellow | Adjacent tier on the Consumer→Extraordinary scale (see `src/lib/game/rarityMatching.ts`) |
-| Case/Collection | Green | — | Exact match only (see `src/lib/game/caseMatching.ts`) |
-| Knife | Green | — | Exact boolean match only |
+| Collection | Green | — | Exact match only (see `src/lib/game/caseMatching.ts`) |
+| Rarity | Green | Yellow | Adjacent tier on the Consumer→Rare Special Item scale (see `src/lib/game/rarityMatching.ts`) |
+| Weapon Type | Green | Yellow | Same weapon exactly; yellow for a different weapon in the same family (see `src/lib/game/weaponMatching.ts`) |
+
+Color is **not** a compared attribute — skins vary too widely in palette for it to be a fair category. The
+dominant color is still derived per skin at import time and powers the third clue.
 
 All matching rules are documented with their reasoning directly in the respective module under
 `src/lib/game/`. Nothing lives inside a React component — the comparison engine
 (`src/lib/game/skinComparison.ts`) is a pure, independently-testable function.
 
+**Winning** is decided by skin identity, not by an all-green row. With four attributes two different skins
+can legitimately match on all of them, so an all-green row means "extremely close", not a win.
+
 - **Daily mode**: one shared target for every player, derived deterministically from the UTC calendar
-  date (SHA-256 hash of the date, never computed or trusted client-side). Resets at 00:00 UTC.
-- **Unlimited mode**: a new random target every game, no guess limit.
-- **Clues**: case, rarity, and color can each be revealed once per game.
+  date (SHA-256 of the date → index into the active skin pool), resolved server-side and stored in
+  `DailySkinGame` so a day's target stays fixed even if the pool changes later. Resets at 00:00 UTC, and
+  the in-game countdown re-fetches automatically when it elapses.
+- **Unlimited mode**: a new random target every game, no guess limit, entirely separate from Daily.
+- **Clues** unlock as guesses are spent, and each can be revealed once per game:
+
+  | After | Clue |
+  |---|---|
+  | 3 guesses | Case / Collection |
+  | 5 guesses | Rarity |
+  | 7 guesses | Color |
+
+  Thresholds live in `src/lib/game/config.ts` and are enforced server-side — an un-revealed clue's value
+  is never sent to the browser, so the lock can't be bypassed from the client.
 
 **Map Guess** — identify one of 12 CS2 maps from a heavily zoomed-in view. You get 11 guesses; each wrong
 guess reveals roughly another ~9% of the image (tuned so the 11th guess always reveals exactly 100% — see
@@ -193,14 +209,20 @@ Add/remove entries in `scripts/data/popularSkinsAllowlist.ts` to change which sk
 
 ## Architecture notes
 
-- **Comparison engine** (`src/lib/game/skinComparison.ts` + `colorMatching.ts`/`wearMatching.ts`/
-  `rarityMatching.ts`/`caseMatching.ts`) is pure, standalone, and unit-tested — no UI or persistence
+- **Comparison engine** (`src/lib/game/skinComparison.ts` + `wearMatching.ts`/`caseMatching.ts`/
+  `rarityMatching.ts`/`weaponMatching.ts`) is pure, standalone, and unit-tested — no UI or persistence
   concerns. Components only render whatever it returns.
 - **Server-authoritative state**: the daily/unlimited/map target is never sent to the client until the
-  game ends. Game sessions live in the database, keyed by an anonymous httpOnly cookie
-  (`src/lib/server/session.ts`) — no accounts, but daily-mode progress survives a page refresh.
-- **Config-driven gameplay**: guess limits, reveal percentages, clue keys, and all category orderings live
-  in `src/lib/game/config.ts` — nothing is hardcoded through the UI layer.
+  game ends, and an un-revealed clue's value is never sent at all. Game sessions live in the database,
+  keyed by an anonymous httpOnly cookie (`src/lib/server/session.ts`) — no accounts, but daily progress
+  survives a refresh. The browser only ever stores a session id, never the target.
+- **Server-enforced rules**: duplicate guesses, clue unlock thresholds, session ownership and the
+  exact-identity win condition are all validated in `src/lib/server/skinGame.ts`, not just in the UI.
+- **Config-driven gameplay**: guess limits, reveal percentages, clue keys and thresholds, and all category
+  orderings live in `src/lib/game/config.ts` — nothing is hardcoded through the UI layer.
+- **Progression** (`src/lib/game/playerRank.ts`): profile level 1-40; reaching the cap resets the level and
+  awards that calendar year's Service Medal, after which the level climbs freely until the year turns
+  over. The daily streak only advances on an actual daily win, and never twice for the same day.
 
 ## Known limitations
 

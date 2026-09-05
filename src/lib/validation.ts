@@ -9,7 +9,7 @@ export const mapGuessSchema = z.object({
 });
 
 export const clueSchema = z.object({
-  clue: z.enum(["wear", "rarity", "collection"]),
+  clue: z.enum(["collection", "rarity", "color"]),
 });
 
 export const agentSchema = z.object({

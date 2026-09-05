@@ -7,6 +7,14 @@ import { prisma } from "./db";
 import { toNormalizedSkin, toSkinSummary, type SkinSummary } from "./normalize";
 import { recordActivity, recordDailyWin, recordGameCompleted } from "./playerStats";
 
+/** Thrown when a skin already guessed in this game is submitted again. */
+export class DuplicateGuessError extends Error {
+  constructor(public readonly displayName: string) {
+    super(`You already guessed ${displayName}.`);
+    this.name = "DuplicateGuessError";
+  }
+}
+
 export interface GuessHistoryEntry {
   guessOrder: number;
   skin: SkinSummary;
@@ -31,6 +39,8 @@ export interface SkinGameStateDTO {
   clues: ClueState[];
   target: SkinSummary | null; // only populated once the game is over
   nextResetAt: string | null; // ISO timestamp, DAILY_SKIN only
+  /** UTC calendar day this daily game belongs to, "YYYY-MM-DD". Daily only. */
+  dateKey: string | null;
 }
 
 async function loadSession(sessionId: string) {
@@ -86,16 +96,22 @@ async function buildStateDTO(
     target: isOver ? toSkinSummary(session.targetSkin) : null,
     nextResetAt:
       session.mode === "DAILY_SKIN" ? new Date(Date.now() + msUntilNextUtcMidnight()).toISOString() : null,
+    dateKey: session.mode === "DAILY_SKIN" ? session.dateKey : null,
   };
 }
 
+/**
+ * The value revealed by a clue. Only ever called for clues the player has
+ * actually unlocked and revealed — buildStateDTO passes null otherwise,
+ * so an un-revealed clue's value never reaches the client.
+ */
 function cluePayload(
   key: ClueKey,
-  skin: { caseOrCollection: string | null; rarity: string; wear: string },
+  skin: { caseOrCollection: string | null; rarity: string; color: string },
 ): string {
   if (key === "collection") return skin.caseOrCollection ?? "No collection";
   if (key === "rarity") return skin.rarity;
-  return skin.wear;
+  return skin.color;
 }
 
 export async function getOrStartDailySession(sessionToken: string): Promise<SkinGameStateDTO> {
@@ -155,6 +171,13 @@ export async function submitSkinGuess(
   const guessedSkin = await prisma.skin.findUnique({ where: { id: guessedSkinId } });
   if (!guessedSkin) {
     throw new Error("Unknown skin id.");
+  }
+
+  // Reject a repeat of a skin already guessed in this game. Enforced here
+  // as well as in the UI so a double-submit (or a direct API call) can't
+  // append a duplicate row or inflate the guess count.
+  if (session.guesses.some((g) => g.guessedSkinId === guessedSkinId)) {
+    throw new DuplicateGuessError(guessedSkin.displayName);
   }
 
   const result = compareSkin(toNormalizedSkin(guessedSkin), toNormalizedSkin(session.targetSkin));

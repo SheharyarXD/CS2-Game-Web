@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import type { SkinSummary } from "@/lib/server/normalize";
 import { Panel, PanelHead } from "@/components/ui/Panel";
+import { DailyCountdown } from "./DailyCountdown";
 import { useT } from "@/lib/i18n/SettingsProvider";
 
 interface GameStatusProps {
@@ -21,7 +21,13 @@ export function GameStatus({ status, target, guessCount, mode, nextResetAt, onPl
   const won = status === "WON";
 
   return (
-    <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+    <motion.div
+      // A win is the payoff moment, so the panel arrives with a short
+      // scale-in rather than the plain fade used elsewhere.
+      initial={{ opacity: 0, y: 8, scale: won ? 0.97 : 1 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <Panel className={won ? "border-[#3f6b33]" : "border-[#7d3b34]"}>
         <PanelHead
           title={won ? t("game.targetIdentified") : t("game.roundOver")}
@@ -32,7 +38,12 @@ export function GameStatus({ status, target, guessCount, mode, nextResetAt, onPl
           }
         />
         <div className="flex flex-col items-center gap-4 p-4 sm:flex-row sm:items-center">
-          <div className="relative h-[152px] w-[248px] shrink-0 border border-[#2c4150] bg-[#0e1922]">
+          <motion.div
+            initial={won ? { opacity: 0, scale: 0.9 } : false}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+            className="relative h-[152px] w-[248px] shrink-0 border border-[#2c4150] bg-[#0e1922]"
+          >
             <Image
               src={target.imageUrl}
               alt={target.displayName}
@@ -42,7 +53,7 @@ export function GameStatus({ status, target, guessCount, mode, nextResetAt, onPl
               unoptimized
               loading="eager"
             />
-          </div>
+          </motion.div>
           <div className="min-w-0 flex-1 text-center sm:text-left">
             <p className="font-display text-[20px] font-medium uppercase tracking-wide text-white">
               {target.weapon}
@@ -55,7 +66,12 @@ export function GameStatus({ status, target, guessCount, mode, nextResetAt, onPl
                   : t("game.solvedIn", { count: guessCount })
                 : t("game.betterLuck")}
             </p>
-            {mode === "daily" && nextResetAt && <DailyCountdown nextResetAt={nextResetAt} label={t("game.nextDailyIn")} />}
+            {mode === "daily" && nextResetAt && (
+              <p className="mt-1.5 flex items-center justify-center gap-1.5 font-display text-[11px] uppercase tracking-wide text-cs-dim2 sm:justify-start">
+                {t("game.nextDailyIn")}
+                <DailyCountdown nextResetAt={nextResetAt} />
+              </p>
+            )}
           </div>
           {mode === "unlimited" && onPlayAgain && (
             <button
@@ -72,29 +88,3 @@ export function GameStatus({ status, target, guessCount, mode, nextResetAt, onPl
   );
 }
 
-function DailyCountdown({ nextResetAt, label }: { nextResetAt: string; label: string }) {
-  const targetMs = new Date(nextResetAt).getTime();
-  const [now, setNow] = useState<number | null>(null);
-
-  useEffect(() => {
-    setNow(Date.now());
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  if (now === null) return null; // avoid an SSR/client clock mismatch
-
-  const diff = Math.max(0, targetMs - now);
-  const hours = Math.floor(diff / 3_600_000);
-  const minutes = Math.floor((diff % 3_600_000) / 60_000);
-  const seconds = Math.floor((diff % 60_000) / 1000);
-
-  return (
-    <p className="mt-1.5 font-display text-[11px] uppercase tracking-wide text-cs-dim2">
-      {label}{" "}
-      <span className="tabular-nums text-cs-amberLt">
-        {hours}h {minutes}m {seconds}s
-      </span>
-    </p>
-  );
-}

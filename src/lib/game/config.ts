@@ -1,20 +1,21 @@
 // Centralized gameplay configuration. Nothing in the game-logic or UI layers
 // should hardcode these values directly — change behavior here.
-import type { ClueKey, RarityKey, WearKey } from "./types";
+import type { ClueKey, ColorKey, RarityKey, WearKey } from "./types";
 
 export const gameConfig = {
   /** Skin mode has no guess cap unless the client asks for one later. */
   skinMode: {
     maxGuesses: null as number | null,
     /**
-     * Clues unlock progressively as the player uses up guesses, weakest
-     * hint first. `unlocksAfter` is the number of guesses that must be
-     * submitted before the clue can be revealed.
+     * Clues unlock progressively as the player spends guesses.
+     * `unlocksAfter` is the number of guesses that must be submitted
+     * before the clue can be revealed. The order and thresholds are fixed
+     * by the agreed spec: Case at 3, Rarity at 5, Colour at 7.
      */
     clues: [
-      { key: "wear" as ClueKey, unlocksAfter: 3 },
+      { key: "collection" as ClueKey, unlocksAfter: 3 },
       { key: "rarity" as ClueKey, unlocksAfter: 5 },
-      { key: "collection" as ClueKey, unlocksAfter: 7 },
+      { key: "color" as ClueKey, unlocksAfter: 7 },
     ],
     /** Each clue can only be revealed once per game session. */
     clueRevealLimit: 1,
@@ -54,6 +55,48 @@ export const WEAR_LABELS: Record<WearKey, string> = {
   field_tested: "Field-Tested",
   well_worn: "Well-Worn",
   battle_scarred: "Battle-Scarred",
+};
+
+/**
+ * Colour labels and swatches for the Colour clue.
+ *
+ * Colour is not a compared attribute — it was retired as a category
+ * because skins vary too widely in palette for it to be a fair
+ * comparison. The value is still derived per skin at import time from the
+ * actual render (scripts/lib/extractDominantColor.ts) and is used here to
+ * power the third clue.
+ */
+export const COLOR_LABELS: Record<ColorKey, string> = {
+  red: "Red",
+  orange: "Orange",
+  yellow: "Yellow",
+  green: "Green",
+  blue: "Blue",
+  purple: "Purple",
+  pink: "Pink",
+  black: "Black",
+  white: "White",
+  gray: "Gray",
+  brown: "Brown",
+  gold: "Gold",
+  multicolor: "Multicolor",
+};
+
+/** Swatch shown beside the revealed colour clue. */
+export const COLOR_SWATCHES: Record<ColorKey, string> = {
+  red: "#c0392b",
+  orange: "#d9782d",
+  yellow: "#d9c22d",
+  green: "#4c9a4c",
+  blue: "#3d6fd9",
+  purple: "#7c4cd9",
+  pink: "#d94c9c",
+  black: "#1c1c1c",
+  white: "#e8e8e8",
+  gray: "#8a8a8a",
+  brown: "#7a5231",
+  gold: "#c9a04a",
+  multicolor: "linear-gradient(135deg,#c0392b,#d9c22d,#4c9a4c,#3d6fd9,#7c4cd9)",
 };
 
 export const RARITY_ORDER: RarityKey[] = [
