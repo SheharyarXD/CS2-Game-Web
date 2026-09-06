@@ -142,6 +142,51 @@ body::after {
     inset 0 -1px 0 rgba(0, 0, 0, 0.5);
 }
 
+/*
+  A floating menu (the Skins dropdown). Same family as .cs-panel but with a
+  fully opaque fill: a panel sits on the page background and can afford a
+  little translucency, whereas a menu floats over live content and has to
+  hide whatever it covers.
+*/
+.cs-menu {
+  background: linear-gradient(180deg, #1e2f3b 0%, #16242e 100%);
+  border: 1px solid rgba(96, 128, 148, 0.6);
+  box-shadow:
+    0 16px 34px -8px rgba(0, 0, 0, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+}
+
+/* A menu row. The amber bar on the left marks hover and the current page. */
+.cs-menu-item {
+  position: relative;
+  background: transparent;
+}
+.cs-menu-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #e0a12a;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.cs-menu-item:hover {
+  background: #24394a;
+}
+.cs-menu-item:hover::before {
+  opacity: 1;
+}
+.cs-menu-item[data-active="true"] {
+  background: #2a4152;
+}
+.cs-menu-item[data-active="true"]::before {
+  opacity: 1;
+}
+
 /* The lighter title strip at the top of a panel. */
 .cs-panel-head {
   background: linear-gradient(180deg, #3a5265 0%, #2a3f4f 55%, #223441 100%);

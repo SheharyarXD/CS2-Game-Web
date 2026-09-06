@@ -33,8 +33,15 @@ export function TopNav() {
     function onDown(e: MouseEvent) {
       if (skinsRef.current && !skinsRef.current.contains(e.target as Node)) setSkinsOpen(false);
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSkinsOpen(false);
+    }
     document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
   }, []);
 
   // Close the dropdown once navigation has happened.
@@ -76,7 +83,13 @@ export function TopNav() {
                 aria-haspopup="menu"
                 aria-expanded={skinsOpen}
                 onClick={() => setSkinsOpen((o) => !o)}
-                className={cn(tabClass(skinsActive), "w-full")}
+                className={cn(
+                  tabClass(skinsActive || skinsOpen),
+                  "w-full",
+                  // While open the tab loses its bottom lip so it joins the
+                  // panel hanging beneath it.
+                  skinsOpen && "shadow-none",
+                )}
               >
                 {t("nav.skins")}
                 <ChevronIcon className={cn("h-2.5 w-2.5 transition-transform", skinsOpen && "rotate-180")} />
@@ -85,7 +98,7 @@ export function TopNav() {
               {skinsOpen && (
                 <div
                   role="menu"
-                  className="cs-panel absolute left-0 top-full z-50 mt-[2px] w-full min-w-[190px] p-1"
+                  className="cs-menu absolute left-0 top-full z-50 w-full min-w-[212px] overflow-hidden"
                 >
                   <DropdownItem
                     href="/skins/daily"
@@ -157,15 +170,15 @@ function DropdownItem({
     <Link
       href={href}
       role="menuitem"
-      className={cn(
-        "focus-ring group flex items-center gap-2.5 px-2.5 py-2 transition-colors",
-        active ? "bg-[#2a4152]" : "hover:bg-[#1d3039]",
-      )}
+      data-active={active}
+      className="cs-menu-item focus-ring flex items-center gap-2.5 py-2 pl-3 pr-3.5"
     >
       <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dot)} />
       <span className="min-w-0 flex-1 text-left">
         <span className="block truncate font-display text-[12px] uppercase tracking-wide text-white">{title}</span>
-        <span className="block truncate text-[10px] normal-case tracking-normal text-cs-dim2">{note}</span>
+        <span className="mt-0.5 block truncate text-[10px] normal-case leading-tight tracking-normal text-cs-dim2">
+          {note}
+        </span>
       </span>
     </Link>
   );
