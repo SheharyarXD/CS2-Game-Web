@@ -20,3 +20,10 @@ deliverables/
 coverage/
 tsconfig.tsbuildinfo
 next-env.d.ts
+
+# .env.example is a committed template with placeholder values only.
+!.env.example
+
+# Local agent tooling, not part of the application.
+.claude/
+skills-lock.json

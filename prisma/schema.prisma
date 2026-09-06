@@ -1,17 +1,28 @@
 // CS2 Guessing Game — data model.
 //
-// Local development uses SQLite (zero setup, file-based). For production,
-// point DATABASE_URL at a Postgres instance (Neon/Supabase/Railway) — see
-// the "Switching to Postgres" section of the README. The schema below only
-// uses types/features supported by both providers.
+// Postgres, in both development and production. The app is deployed to
+// Vercel, whose functions have no persistent filesystem, so a file-based
+// database is not an option there; running the same engine locally keeps
+// dev and production honest about each other.
+//
+// The schema deliberately avoids Prisma enums and case-insensitive
+// filters, which is a holdover from the earlier SQLite setup and costs
+// nothing to keep.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  // Pooled connection, used by the app at runtime. On serverless every
+  // invocation can open its own connection, so this should point at a
+  // pooler (Neon's -pooler host, Supabase's port 6543, or PgBouncer).
+  url       = env("DATABASE_URL")
+  // Direct, unpooled connection. Prisma uses this for migrations, which
+  // a transaction pooler cannot run. Falls back to DATABASE_URL when the
+  // provider does not distinguish the two.
+  directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------------------

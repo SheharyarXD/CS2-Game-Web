@@ -4,6 +4,7 @@
   "private": true,
   "description": "A Wordle/Pokedle-style daily guessing game for CS2 skins and maps.",
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

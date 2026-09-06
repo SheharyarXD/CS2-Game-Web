@@ -16,8 +16,7 @@ running CS2 game client — it's a fully independent browser game.
 - [Skin data pipeline](#skin-data-pipeline)
 - [Map art](#map-art)
 - [Development commands](#development-commands)
-- [Switching to Postgres](#switching-to-postgres)
-- [Deployment](#deployment)
+- [Deployment (Vercel)](#deployment-vercel)
 - [Adding a new map](#adding-a-new-map)
 - [Updating skin data](#updating-skin-data)
 - [Architecture notes](#architecture-notes)
@@ -27,7 +26,7 @@ running CS2 game client — it's a fully independent browser game.
 
 - **Frontend:** Next.js 14 (App Router), React 18, TypeScript (strict), Tailwind CSS, Framer Motion
 - **Backend:** Next.js Route Handlers, Prisma ORM
-- **Database:** SQLite for local dev (zero setup); Postgres-ready for production (Neon/Supabase/Railway)
+- **Database:** PostgreSQL, in both development and production (Neon, Supabase, Railway, or your own)
 - **Data source:** [ByMykel/CSGO-API](https://github.com/ByMykel/CSGO-API) — a public, no-auth-required,
   community-maintained JSON mirror of Valve's item schema
 - **Tests:** Vitest
@@ -76,25 +75,33 @@ guess reveals roughly another ~9% of the image (tuned so the 11th guess always r
 
 ## Local setup
 
-Prerequisites: Node.js 20+ and npm.
+Prerequisites: Node.js 20+, npm, and a PostgreSQL database you can connect to. A free Neon or Supabase
+instance works fine, and so does a local Postgres.
 
 ```bash
-npm install
-cp .env.example .env
-npx prisma migrate dev --name init   # creates prisma/dev.db and applies the schema
-npm run seed                         # fetches skin data, generates map art, seeds both
+npm install                          # `postinstall` runs `prisma generate` for you
+cp .env.example .env                 # then edit .env and fill in your two connection strings
+npm run prisma:deploy                # applies the existing migration to your database
+npm run seed                         # fetches skin data, generates map art, seeds skins/agents/maps
 npm run dev                          # http://localhost:3000
 ```
 
+If you are changing the schema rather than just setting up, use `npm run prisma:migrate` instead of
+`prisma:deploy` so a new migration file gets written.
+
 ## Environment variables
 
-See `.env.example`. Only two variables exist:
+See `.env.example`.
 
-- `DATABASE_URL` — Prisma connection string. Defaults to a local SQLite file.
-- `SKIN_DATA_SOURCE_URL` — optional override for the upstream skin dataset URL used by
-  `npm run data:fetch`. Defaults to the public ByMykel/CSGO-API mirror.
+| Variable | Required | What it is |
+|---|---|---|
+| `DATABASE_URL` | yes | Pooled Postgres connection string. This is what the running app uses. On a serverless host every invocation can open its own connection, so point it at a pooler (Neon's `-pooler` host, Supabase port 6543, or PgBouncer). |
+| `DIRECT_URL` | yes | Direct, unpooled connection. Prisma uses it for migrations, which a transaction pooler cannot run. If your provider does not distinguish the two, set both to the same string. |
+| `SKIN_DATA_SOURCE_URL` | no | Override for the upstream skin dataset used by `npm run data:fetch`. Defaults to the public ByMykel/CSGO-API mirror. |
+| `AGENT_DATA_SOURCE_URL` | no | Same idea, for the agent portrait dataset used by `npm run seed:agents`. |
 
-No API keys are required — the chosen data source needs no authentication.
+No API keys are required — the chosen data source needs no authentication. `.env` is gitignored and must
+never be committed.
 
 ## Database
 
@@ -109,9 +116,10 @@ Schema: `prisma/schema.prisma`. Key models:
   httpOnly random-UUID cookie, no accounts). The target id is never serialized to the client until the
   game ends.
 
-`mode`/`status`/`rarity`/`wear`/`color`/`caseType` are stored as plain strings rather than Prisma enums —
-SQLite's connector doesn't support enums, and this schema is written to run unmodified against both SQLite
-and Postgres. Validity is enforced at the application layer via the TS unions in `src/lib/game/types.ts`.
+`mode`/`status`/`rarity`/`wear`/`color`/`caseType` are stored as plain strings rather than Prisma enums,
+and search goes through a lowercased `searchText` column rather than a case-insensitive filter. Both are
+holdovers from an earlier SQLite setup that cost nothing to keep, and they keep the schema portable.
+Validity is enforced at the application layer via the TS unions in `src/lib/game/types.ts`.
 
 Run migrations with:
 
@@ -165,28 +173,39 @@ npm run test              # vitest run
 npm run test:watch         # vitest watch mode
 ```
 
-## Switching to Postgres
+## Deployment (Vercel)
 
-1. In `prisma/schema.prisma`, change the datasource:
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
+The app is a standard Next.js App Router project, so Vercel needs no special configuration — no
+`vercel.json`, no custom build command. The only thing to get right is the database.
+
+1. **Provision Postgres.** Neon, Supabase, and Railway all have a free tier that works. Grab both the
+   pooled and the direct connection string.
+2. **Set the environment variables** in the Vercel project (Production, Preview, and Development):
+   `DATABASE_URL` (pooled), `DIRECT_URL` (direct), and optionally the two data source overrides.
+3. **Apply the migration** once, from your machine, against the production database:
+   ```bash
+   npm run prisma:deploy
    ```
-2. Set `DATABASE_URL` to your Postgres connection string (Neon/Supabase/Railway all work).
-3. `npx prisma migrate dev --name init` against the new database, then `npm run seed`.
+   `prisma migrate deploy` only applies migrations that have not run yet. It never drops or resets
+   anything, which is why it is the right command to point at production.
+4. **Seed the content tables** once, also from your machine:
+   ```bash
+   npm run seed
+   ```
+   Every seed script is an idempotent upsert, so re-running it after a data refresh is safe and will not
+   duplicate rows or disturb in-flight game sessions.
+5. **Deploy.** Push to the connected branch, or run `vercel --prod`. `prisma generate` runs automatically
+   during install via the `postinstall` script, which is required because Vercel caches `node_modules`
+   between builds and the generated client would otherwise go stale.
 
-No application code needs to change — the schema deliberately avoids SQLite/Postgres-incompatible
-features (enums, `mode: "insensitive"` filters) so it runs unmodified against either.
+Notes on running this on serverless:
 
-## Deployment
-
-- **App**: deploy to Vercel (or any Node host) — it's a standard Next.js app, no special config.
-- **Database**: provision Postgres on Neon/Supabase/Railway, switch the datasource as above, run
-  `npm run prisma:deploy` then `npm run seed` against production `DATABASE_URL`.
-- Set `DATABASE_URL` (and optionally `SKIN_DATA_SOURCE_URL`) in your hosting provider's environment
-  variables — never commit `.env`.
+- Nothing is written to the filesystem at runtime. The skin images are hotlinked from Steam's CDN and the
+  map art is served from `public/`, both of which are read-only and fine on Vercel.
+- The home page is marked `force-dynamic` because it reads live counts from the database. Without that,
+  Next would prerender it at build time and bake in whatever the build machine saw.
+- All game state lives in Postgres and is keyed by an httpOnly cookie, so it survives cold starts and does
+  not depend on any one instance staying alive.
 
 ## Adding a new map
 
