@@ -9,7 +9,7 @@ import {
   startUnlimitedSession,
   submitSkinGuess,
 } from "@/lib/server/skinGame";
-import { dateKeyUTC } from "@/lib/game/dailyTarget";
+import { dateKeyEastern } from "@/lib/game/dailyTarget";
 
 /**
  * Integration tests for the rules the server has to enforce itself:
@@ -70,7 +70,7 @@ describe("daily mode", () => {
     const second = await getOrStartDailySession(token);
 
     expect(second.sessionId).toBe(first.sessionId);
-    expect(second.dateKey).toBe(dateKeyUTC());
+    expect(second.dateKey).toBe(dateKeyEastern());
     expect(second.mode).toBe("DAILY_SKIN");
   });
 
@@ -98,12 +98,12 @@ describe("daily mode", () => {
 
     // Backdate the session, then ask again: a fresh session for today
     // must be created rather than yesterday's being handed back.
-    const yesterday = dateKeyUTC(new Date(Date.now() - 86_400_000));
+    const yesterday = dateKeyEastern(new Date(Date.now() - 86_400_000));
     await prisma.gameSession.update({ where: { id: today.sessionId }, data: { dateKey: yesterday } });
 
     const fresh = await getOrStartDailySession(token);
     expect(fresh.sessionId).not.toBe(today.sessionId);
-    expect(fresh.dateKey).toBe(dateKeyUTC());
+    expect(fresh.dateKey).toBe(dateKeyEastern());
     expect(fresh.guesses).toHaveLength(0);
   });
 });

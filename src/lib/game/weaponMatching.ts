@@ -1,20 +1,26 @@
 import type { MatchState, WeaponCategory } from "./types";
 
 /**
- * Weapon type comparison rules.
+ * Weapon comparison rules.
  *
- * This replaces the old knife yes/no attribute with the specific weapon
- * the skin belongs to (AK-47, Glock-18, M4A4, M4A1-S, USP-S, ...).
+ * The category is the EXACT weapon the skin belongs to — AK-47, M4A4,
+ * M4A1-S, Glock-18, USP-S, Karambit — and that exact name is what the
+ * player sees in the column. The weapon family is only ever used to soften
+ * a miss into a partial; it never stands in for the weapon itself.
  *
  *  - Same weapon                                  -> "correct"
  *  - Different weapon, same family (both rifles,
  *    both pistols, both knives, ...)              -> "partial"
  *  - Different family                             -> "incorrect"
  *
- * The partial rule keeps the attribute useful: learning that the target
- * is "some pistol" narrows the pool without giving the answer away.
+ * So M4A1-S against M4A4 is a partial, never a match: they are two
+ * different weapons that happen to share a family. Likewise USP-S against
+ * P2000, and AK-47 against Galil AR. The partial keeps the attribute
+ * useful — learning the target is "some pistol" narrows the pool without
+ * giving the answer away — while still holding the line that only the same
+ * weapon scores green.
  */
-export function compareWeaponType(
+export function compareWeapon(
   guess: { weapon: string; weaponCategory: WeaponCategory },
   target: { weapon: string; weaponCategory: WeaponCategory },
 ): MatchState {

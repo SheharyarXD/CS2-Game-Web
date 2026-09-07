@@ -6,7 +6,6 @@ import type {
   NormalizedSkin,
   RarityKey,
   WeaponCategory,
-  WearKey,
 } from "@/lib/game/types";
 
 /** Maps a Prisma Skin row to the plain domain type the comparison engine consumes. */
@@ -20,7 +19,7 @@ export function toNormalizedSkin(skin: PrismaSkin): NormalizedSkin {
     rarity: skin.rarity as RarityKey,
     caseOrCollection: skin.caseOrCollection,
     caseType: skin.caseType as CaseType,
-    wear: skin.wear as WearKey,
+    releaseYear: skin.releaseYear,
     color: skin.color as ColorKey,
     weaponCategory: skin.weaponCategory as WeaponCategory,
     isKnife: skin.isKnife,
@@ -40,7 +39,7 @@ export function toNormalizedMap(map: PrismaMap): NormalizedMap {
 
 /**
  * Lightweight shape for search results / guess history. Includes the
- * guessed skin's own attributes (color/wear/case/rarity/knife) — safe to
+ * guessed skin's own attributes (weapon/case/rarity/year) — safe to
  * expose because this always describes a skin the player already guessed,
  * never the secret target.
  */
@@ -51,9 +50,9 @@ export interface SkinSummary {
   name: string;
   imageUrl: string;
   rarity: RarityKey;
-  wear: WearKey;
   caseOrCollection: string | null;
   caseType: CaseType;
+  releaseYear: number | null;
   weaponCategory: WeaponCategory;
 }
 
@@ -65,9 +64,9 @@ export function toSkinSummary(skin: PrismaSkin): SkinSummary {
     name: skin.name,
     imageUrl: skin.imageUrl,
     rarity: skin.rarity as RarityKey,
-    wear: skin.wear as WearKey,
     caseOrCollection: skin.caseOrCollection,
     caseType: skin.caseType as CaseType,
+    releaseYear: skin.releaseYear,
     weaponCategory: skin.weaponCategory as WeaponCategory,
   };
 }

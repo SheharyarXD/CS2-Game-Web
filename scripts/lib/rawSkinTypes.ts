@@ -1,6 +1,7 @@
-// Shape of one entry in the ByMykel/CSGO-API `skins.json` dataset.
-// Only the fields we actually consume are typed — the real payload has a
-// few more (description, min_float, max_float, paint_index, team, ...).
+// Shapes of the ByMykel/CSGO-API datasets we consume. Only the fields we
+// actually read are typed — the real payloads carry a few more
+// (description, min_float, max_float, paint_index, team, ...).
+
 export interface RawSkin {
   id: string;
   name: string;
@@ -14,4 +15,30 @@ export interface RawSkin {
   collections: Array<{ id: string; name: string; image: string }>;
   crates: Array<{ id: string; name: string; image: string }>;
   image: string;
+}
+
+/**
+ * One container from crates.json. `first_sale_date` is the day the crate
+ * went on sale and is the authority for a skin's original release; it is
+ * absent on some container types we never use (souvenir packages,
+ * autograph capsules), which is why it is optional here.
+ */
+export interface RawCrate {
+  id: string;
+  name: string;
+  /** "Case" | "Souvenir" | "Sticker Capsule" | ... */
+  type: string | null;
+  first_sale_date: string | null;
+}
+
+/**
+ * One collection from collections.json. All but one carry a release_date,
+ * and `crates` says which containers ship it — that link is what lets an
+ * undated crate inherit its collection's date.
+ */
+export interface RawCollection {
+  id: string;
+  name: string;
+  release_date: string | null;
+  crates?: Array<{ id: string; name: string }>;
 }

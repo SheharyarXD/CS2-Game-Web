@@ -1,4 +1,4 @@
-import { dateKeyUTC } from "@/lib/game/dailyTarget";
+import { dateKeyEastern, previousDateKey } from "@/lib/game/dailyTarget";
 import { GAMES_TO_MAX_LEVEL } from "@/lib/game/playerRank";
 import { prisma } from "./db";
 
@@ -19,14 +19,13 @@ export interface PlayerStatsDTO {
 }
 
 function isYesterday(dateKey: string, candidateYesterday: string): boolean {
-  const d = new Date(`${dateKey}T00:00:00.000Z`);
-  const expectedYesterday = dateKeyUTC(new Date(d.getTime() - 86_400_000));
+  const expectedYesterday = previousDateKey(dateKey);
   return expectedYesterday === candidateYesterday;
 }
 
 /** Call once per guess submission (any mode). Tracks distinct days played. */
 export async function recordActivity(sessionToken: string): Promise<void> {
-  const today = dateKeyUTC();
+  const today = dateKeyEastern();
   const existing = await prisma.playerStats.findUnique({ where: { sessionToken } });
 
   if (!existing) {
@@ -86,7 +85,7 @@ export async function recordGameCompleted(sessionToken: string): Promise<void> {
  * guess cap, so they only ever end in a win — meaning "solved the daily"
  * and "streak" can be tracked purely off consecutive win dates.
  */
-export async function recordDailyWin(sessionToken: string, dateKey: string = dateKeyUTC()): Promise<void> {
+export async function recordDailyWin(sessionToken: string, dateKey: string = dateKeyEastern()): Promise<void> {
   const existing = await prisma.playerStats.findUnique({ where: { sessionToken } });
 
   if (!existing) {

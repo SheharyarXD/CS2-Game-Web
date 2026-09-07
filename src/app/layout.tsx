@@ -15,8 +15,8 @@ const body = Saira({ subsets: ["latin"], weight: ["400", "500", "600"], variable
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "CS2 Guessing Game: Skin & Map Dle",
-  description: "A daily Counter-Strike 2 skin and map guessing game, inspired by Wordle and Pokedle.",
+  title: "Skindle — A Counter-Strike Inspired Daily Guesser",
+  description: "Skindle is a daily Counter-Strike skin guessing game. One shared skin every day, four clues, unlimited practice rounds.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

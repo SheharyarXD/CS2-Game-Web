@@ -1,5 +1,5 @@
 import { gameConfig } from "@/lib/game/config";
-import { dateKeyUTC, msUntilNextUtcMidnight } from "@/lib/game/dailyTarget";
+import { dateKeyEastern, msUntilNextDailyReset } from "@/lib/game/dailyTarget";
 import { compareSkin } from "@/lib/game/skinComparison";
 import type { ClueKey, SkinComparisonResult } from "@/lib/game/types";
 import { getOrCreateDailySkinId } from "./dailyGame";
@@ -39,7 +39,7 @@ export interface SkinGameStateDTO {
   clues: ClueState[];
   target: SkinSummary | null; // only populated once the game is over
   nextResetAt: string | null; // ISO timestamp, DAILY_SKIN only
-  /** UTC calendar day this daily game belongs to, "YYYY-MM-DD". Daily only. */
+  /** Eastern calendar day this daily game belongs to, "YYYY-MM-DD". Daily only. */
   dateKey: string | null;
 }
 
@@ -70,7 +70,7 @@ async function buildStateDTO(
     .map((g) => ({
       guessOrder: g.guessOrder,
       skin: toSkinSummary(skinById.get(g.guessedSkinId!)!),
-      result: JSON.parse(g.result) as SkinComparisonResult,
+      result: parseStoredResult(g.result),
     }));
 
   const cluesUsed = JSON.parse(session.cluesUsed) as ClueKey[];
@@ -95,8 +95,26 @@ async function buildStateDTO(
     clues,
     target: isOver ? toSkinSummary(session.targetSkin) : null,
     nextResetAt:
-      session.mode === "DAILY_SKIN" ? new Date(Date.now() + msUntilNextUtcMidnight()).toISOString() : null,
+      session.mode === "DAILY_SKIN" ? new Date(Date.now() + msUntilNextDailyReset()).toISOString() : null,
     dateKey: session.mode === "DAILY_SKIN" ? session.dateKey : null,
+  };
+}
+
+/**
+ * Reads a stored comparison result back off a guess row.
+ *
+ * Results are persisted as JSON at the moment the guess was made, so a
+ * session started before the categories changed can still be replayed.
+ * Any attribute the stored blob predates is filled in as "incorrect"
+ * rather than reaching the UI as undefined.
+ */
+function parseStoredResult(raw: string): SkinComparisonResult {
+  const stored = JSON.parse(raw) as Partial<SkinComparisonResult>;
+  return {
+    weapon: stored.weapon ?? "incorrect",
+    collection: stored.collection ?? "incorrect",
+    rarity: stored.rarity ?? "incorrect",
+    year: stored.year ?? { state: "incorrect", direction: null },
   };
 }
 
@@ -115,7 +133,7 @@ function cluePayload(
 }
 
 export async function getOrStartDailySession(sessionToken: string): Promise<SkinGameStateDTO> {
-  const dateKey = dateKeyUTC();
+  const dateKey = dateKeyEastern();
   let session = await prisma.gameSession.findUnique({
     where: { sessionToken_mode_dateKey: { sessionToken, mode: "DAILY_SKIN", dateKey } },
     include: { targetSkin: true, guesses: { orderBy: { guessOrder: "asc" } } },

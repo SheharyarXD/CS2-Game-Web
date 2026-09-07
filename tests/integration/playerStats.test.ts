@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import { getOrStartDailySession, submitSkinGuess } from "@/lib/server/skinGame";
 import { getPlayerStats, recordDailyWin } from "@/lib/server/playerStats";
-import { dateKeyUTC } from "@/lib/game/dailyTarget";
+import { dateKeyEastern } from "@/lib/game/dailyTarget";
 import { GAMES_TO_MAX_LEVEL } from "@/lib/game/playerRank";
 
 /**
@@ -21,7 +21,7 @@ function newToken(): string {
 }
 
 function daysAgo(n: number): string {
-  return dateKeyUTC(new Date(Date.now() - n * 86_400_000));
+  return dateKeyEastern(new Date(Date.now() - n * 86_400_000));
 }
 
 afterAll(async () => {
@@ -65,8 +65,8 @@ describe("daily streak", () => {
 
   it("does not count the same day twice", async () => {
     const token = newToken();
-    await recordDailyWin(token, dateKeyUTC());
-    await recordDailyWin(token, dateKeyUTC());
+    await recordDailyWin(token, dateKeyEastern());
+    await recordDailyWin(token, dateKeyEastern());
     expect((await getPlayerStats(token)).dailyStreak).toBe(1);
   });
 

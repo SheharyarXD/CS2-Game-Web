@@ -1,6 +1,6 @@
 // Centralized gameplay configuration. Nothing in the game-logic or UI layers
 // should hardcode these values directly — change behavior here.
-import type { ClueKey, ColorKey, RarityKey, WearKey } from "./types";
+import type { ClueKey, ColorKey, RarityKey } from "./types";
 
 export const gameConfig = {
   /** Skin mode has no guess cap unless the client asks for one later. */
@@ -27,9 +27,13 @@ export const gameConfig = {
     /** Visible from the very first attempt, before any guess is made. */
     startingRevealPercent: 5,
   },
-  /** Daily challenge resets at 00:00 UTC. */
+  /**
+   * The daily challenge rolls over at midnight Eastern Time. Resolved
+   * through the IANA zone rather than a fixed offset so the reset stays at
+   * local midnight across daylight saving. See lib/game/dailyTarget.ts.
+   */
   daily: {
-    timezone: "UTC",
+    timezone: "America/New_York",
   },
 } as const;
 
@@ -40,22 +44,13 @@ export function clueUnlocksAfter(key: ClueKey): number {
   return gameConfig.skinMode.clues.find((c) => c.key === key)?.unlocksAfter ?? 0;
 }
 
-/** Ordered worst→best is NOT used; canonical order follows in-game UI convention. */
-export const WEAR_ORDER: WearKey[] = [
-  "factory_new",
-  "minimal_wear",
-  "field_tested",
-  "well_worn",
-  "battle_scarred",
-];
-
-export const WEAR_LABELS: Record<WearKey, string> = {
-  factory_new: "Factory New",
-  minimal_wear: "Minimal Wear",
-  field_tested: "Field-Tested",
-  well_worn: "Well-Worn",
-  battle_scarred: "Battle-Scarred",
-};
+/**
+ * The compared attributes, in the order they are shown. Year is pinned
+ * last by the client's spec; everything that renders the comparison table
+ * reads this rather than hardcoding its own order.
+ */
+export const COMPARISON_COLUMNS = ["weapon", "collection", "rarity", "year"] as const;
+export type ComparisonColumn = (typeof COMPARISON_COLUMNS)[number];
 
 /**
  * Colour labels and swatches for the Colour clue.

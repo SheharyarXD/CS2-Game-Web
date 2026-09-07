@@ -4,9 +4,8 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { ComparisonCell } from "./ComparisonCell";
 import { RarityCell } from "./RarityCell";
+import { YearCell } from "./YearCell";
 import type { GuessHistoryEntry } from "@/lib/server/skinGame";
-import { WEAR_LABELS } from "@/lib/game/config";
-import { WEAPON_CATEGORY_LABELS } from "@/lib/game/weaponMatching";
 import { useT } from "@/lib/i18n/SettingsProvider";
 
 export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
@@ -16,12 +15,15 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
     return <p className="px-4 py-8 text-center text-[12px] text-cs-dim2">{t("game.noGuesses")}</p>;
   }
 
+  // Order is fixed by the spec: Weapon, Collection, Rarity, then Year
+  // last. The header row and the cells below are driven from the same
+  // sequence so they cannot drift apart.
   const headers = [
     t("game.colSkin"),
-    t("game.colWear"),
+    t("game.colWeapon"),
     t("game.colCollection"),
     t("game.colRarity"),
-    t("game.colWeapon"),
+    t("game.colYear"),
   ];
 
   return (
@@ -70,9 +72,9 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
               </div>
 
               <ComparisonCell
-                label={t("game.colWear")}
-                value={WEAR_LABELS[guess.skin.wear]}
-                state={guess.result.wear}
+                label={t("game.colWeapon")}
+                value={guess.skin.weapon}
+                state={guess.result.weapon}
                 delay={0.05}
               />
               <ComparisonCell
@@ -87,10 +89,13 @@ export function GuessTable({ guesses }: { guesses: GuessHistoryEntry[] }) {
                 state={guess.result.rarity}
                 delay={0.15}
               />
-              <ComparisonCell
-                label={t("game.colWeapon")}
-                value={WEAPON_CATEGORY_LABELS[guess.skin.weaponCategory]}
-                state={guess.result.weaponType}
+              <YearCell
+                label={t("game.colYear")}
+                year={guess.skin.releaseYear}
+                comparison={guess.result.year}
+                higherLabel={t("game.yearHigher")}
+                lowerLabel={t("game.yearLower")}
+                unknownLabel={t("game.yearUnknown")}
                 delay={0.2}
               />
             </motion.li>

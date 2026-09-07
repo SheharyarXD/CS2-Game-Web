@@ -1,4 +1,4 @@
-import { dailyIndexForDate, dateKeyUTC } from "@/lib/game/dailyTarget";
+import { dailyIndexForDate, dateKeyEastern, previousDateKey } from "@/lib/game/dailyTarget";
 import { prisma } from "./db";
 
 /**
@@ -10,7 +10,7 @@ import { prisma } from "./db";
  * on the same skin used the previous day, the index is nudged forward by
  * one to avoid an immediate repeat.
  */
-export async function getOrCreateDailySkinId(dateKey: string = dateKeyUTC()): Promise<string> {
+export async function getOrCreateDailySkinId(dateKey: string = dateKeyEastern()): Promise<string> {
   const existing = await prisma.dailySkinGame.findUnique({ where: { dateKey } });
   if (existing) return existing.skinId;
 
@@ -25,7 +25,7 @@ export async function getOrCreateDailySkinId(dateKey: string = dateKeyUTC()): Pr
 
   let index = dailyIndexForDate(dateKey, pool.length);
 
-  const yesterday = dateKeyUTC(new Date(new Date(`${dateKey}T00:00:00.000Z`).getTime() - 86_400_000));
+  const yesterday = previousDateKey(dateKey);
   const previous = await prisma.dailySkinGame.findUnique({ where: { dateKey: yesterday } });
   if (previous && pool[index]?.id === previous.skinId && pool.length > 1) {
     index = (index + 1) % pool.length;

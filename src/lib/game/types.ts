@@ -24,13 +24,6 @@ export type ColorKey =
   | "gold"
   | "multicolor";
 
-export type WearKey =
-  | "factory_new"
-  | "minimal_wear"
-  | "field_tested"
-  | "well_worn"
-  | "battle_scarred";
-
 export type RarityKey =
   | "consumer"
   | "industrial"
@@ -54,9 +47,15 @@ export interface NormalizedSkin {
   displayName: string;
   imageUrl: string;
   rarity: RarityKey;
+  /**
+   * The container the skin was FIRST released in. A Rare Special Item can
+   * be dropped from several cases over the years; the comparison always
+   * uses the earliest one. See scripts/lib/normalizeSkin.ts.
+   */
   caseOrCollection: string | null;
   caseType: CaseType;
-  wear: WearKey;
+  /** Year that original container shipped. Null when it cannot be determined. */
+  releaseYear: number | null;
   color: ColorKey;
   weaponCategory: WeaponCategory;
   isKnife: boolean;
@@ -66,14 +65,31 @@ export interface NormalizedSkin {
 export type MatchState = "correct" | "partial" | "incorrect";
 
 /**
+ * Which way the guessed year sits relative to the target's.
+ *
+ * The arrow describes the GUESS, not the direction to move: a guess from a
+ * later year than the target shows "up". Null when the two are equal, or
+ * when either year is unknown and no honest comparison can be drawn.
+ */
+export type YearDirection = "up" | "down" | null;
+
+export interface YearComparison {
+  state: MatchState;
+  direction: YearDirection;
+}
+
+/**
  * The compared attributes, in the order they are shown to the player:
- * wear, collection, rarity, weapon type.
+ * weapon, collection, rarity, year. Year is always last.
+ *
+ * Wear was retired as a category at the client's request and Weapon now
+ * carries the exact weapon (AK-47, M4A1-S, ...) rather than its family.
  */
 export interface SkinComparisonResult {
-  wear: MatchState;
+  weapon: MatchState;
   collection: MatchState;
   rarity: MatchState;
-  weaponType: MatchState;
+  year: YearComparison;
 }
 
 export type GameMode = "DAILY_SKIN" | "UNLIMITED_SKIN" | "MAP";

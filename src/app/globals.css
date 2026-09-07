@@ -66,10 +66,19 @@
 */
 html {
   color-scheme: dark;
-  background-color: #55697b;
+  background-color: #8fa1ae;
+  /*
+    Layered to match the reference menu, front to back:
+      1. a corner vignette that pulls the eye inward
+      2. the soft light bloom the art is built around, sitting left of
+         centre where the crest is rather than dead centre
+      3. the steel-blue field itself, which stays light all the way down —
+         the reference never goes near black at the bottom edge
+  */
   background-image:
-    radial-gradient(ellipse 70% 60% at 50% 38%, rgba(203, 219, 231, 0.55) 0%, rgba(130, 150, 165, 0) 72%),
-    linear-gradient(180deg, #9db0bd 0%, #7f929f 38%, #5c6f7e 72%, #3b4d5b 100%);
+    radial-gradient(ellipse 118% 96% at 50% 44%, rgba(20, 32, 42, 0) 52%, rgba(20, 32, 42, 0.34) 100%),
+    radial-gradient(ellipse 60% 56% at 26% 46%, rgba(218, 231, 240, 0.6) 0%, rgba(176, 195, 209, 0) 72%),
+    linear-gradient(180deg, #8ba0af 0%, #a7b8c4 28%, #9daebb 58%, #8395a3 86%, #71838f 100%);
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
@@ -83,7 +92,12 @@ body {
   overflow-x: hidden;
 }
 
-/* CT crest watermark. */
+/*
+  CT crest watermark. In the reference it sits left of centre at roughly a
+  quarter of the viewport width, large and very low contrast — readable as
+  a shape rather than as a logo, and never competing with the panels that
+  sit over it.
+*/
 body::before {
   content: "";
   position: fixed;
@@ -92,12 +106,27 @@ body::before {
   pointer-events: none;
   background-image: url("/textures/ct-logo.svg");
   background-repeat: no-repeat;
-  background-position: center 44%;
-  background-size: 720px auto;
-  opacity: 0.85;
+  background-position: 24% 47%;
+  background-size: 840px auto;
+  opacity: 0.5;
 }
 
-/* Drifting fog. Two bands at different speeds give the haze depth. */
+/* On narrow screens the crest would sit behind the content column, so it
+   pulls back to a size and position that stays out of the way. */
+@media (max-width: 900px) {
+  body::before {
+    background-position: 50% 40%;
+    background-size: 560px auto;
+    opacity: 0.32;
+  }
+}
+
+/*
+  Drifting atmospheric haze. Two bands at different speeds give it depth.
+  Kept well below the old opacity: the reference reads as still air with a
+  little haze in it, not as weather, and a heavier layer washes out the
+  skin images sitting on top.
+*/
 body::after {
   content: "";
   position: fixed;
@@ -107,8 +136,8 @@ body::after {
   background-image: url("/textures/fog.svg"), url("/textures/fog.svg");
   background-repeat: repeat-x, repeat-x;
   background-size: 1400px auto, 2100px auto;
-  opacity: 0.7;
-  animation: fog-drift 120s linear infinite;
+  opacity: 0.42;
+  animation: fog-drift 150s linear infinite;
 }
 
 @keyframes fog-drift {

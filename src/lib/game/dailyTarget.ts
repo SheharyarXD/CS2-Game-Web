@@ -3,25 +3,25 @@ import { createHash } from "node:crypto";
 /**
  * Deterministic daily target selection.
  *
- * The daily skin is derived from the UTC calendar date, never chosen
- * client-side and never re-rolled on refresh: the same `dateKey` always
- * hashes to the same index for a given pool size. This module is
+ * The daily skin is derived from the calendar date in Eastern Time, never
+ * chosen client-side and never re-rolled on refresh: the same `dateKey`
+ * always hashes to the same index for a given pool size. This module is
  * server-only (uses node:crypto) — it must only be imported from API
  * routes / server code, never from a "use client" component.
+ *
+ * The zone maths lives in ./easternTime, which has no Node-only imports so
+ * the countdown in the UI can tick toward the same instant the server
+ * resets on. Those helpers are re-exported here for server callers.
  */
-
-/** Returns the current UTC calendar date as "YYYY-MM-DD". */
-export function dateKeyUTC(date: Date = new Date()): string {
-  return date.toISOString().slice(0, 10);
-}
-
-/** Milliseconds until the next UTC midnight (the daily reset moment). */
-export function msUntilNextUtcMidnight(date: Date = new Date()): number {
-  const next = new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, 0),
-  );
-  return next.getTime() - date.getTime();
-}
+export {
+  DAILY_TIMEZONE,
+  dateKeyEastern,
+  msUntilNextDailyReset,
+  nextDailyResetAt,
+  nextDateKey,
+  previousDateKey,
+  shiftDateKey,
+} from "./easternTime";
 
 /**
  * Deterministically maps a date key to an index in [0, poolSize).

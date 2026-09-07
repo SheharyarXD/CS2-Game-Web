@@ -24,11 +24,13 @@ export function HomeHero({ skinCount, mapCount }: { skinCount: number; mapCount:
               "repeating-linear-gradient(115deg, #ffffff 0 1px, transparent 1px 46px), repeating-linear-gradient(65deg, #ffffff 0 1px, transparent 1px 62px)",
           }}
         />
-        <div className="relative text-center">
-          <p className="font-display text-[34px] font-bold uppercase leading-none tracking-[0.06em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] sm:text-[46px]">
-            CS2 <span className="text-cs-amberLt">Guess</span>
+        <div className="relative px-4 text-center">
+          <p className="font-display text-[38px] font-bold uppercase leading-none tracking-[0.08em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] sm:text-[54px]">
+            SKIN<span className="text-cs-amberLt">DLE</span>
           </p>
-          <p className="mt-1.5 text-[11px] uppercase tracking-[0.3em] text-cs-text/85">Skins &amp; Maps</p>
+          <p className="mt-2 text-[10.5px] uppercase tracking-[0.22em] text-cs-text/85 sm:text-[12px]">
+            A Counter-Strike Inspired Daily Guesser
+          </p>
         </div>
       </div>
 

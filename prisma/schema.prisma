@@ -36,11 +36,21 @@ model Skin {
   displayName  String // e.g. "AK-47 | Redline"
   imageUrl     String
   rarity       String // normalized rarity key, see lib/game/rarityMatching.ts
-  caseOrCollection String? // display name of the case/collection this skin is found in
+  // The container the skin was FIRST released in. A Rare Special Item can
+  // drop from several cases over the years (Butterfly Knife | Lore is in
+  // both Operation Riptide and Dreams & Nightmares); this always holds the
+  // earliest. See scripts/lib/normalizeSkin.ts#pickOriginalRelease.
+  caseOrCollection String? // display name of that original case/collection
   caseType     String? // "case" | "collection" | null (no known source)
-  wear         String // canonical normalized wear for this skin, see lib/game/wearMatching.ts
-  availableWears String // JSON-encoded string[] of all wear names this skin can drop in (display/reference only)
-  color        String // dominant colour derived from the skin render (kept for reference; no longer compared)
+  sourceContainerId String? // upstream id of the original container, for auditing
+  releaseDate  DateTime? // when that original container first shipped
+  releaseYear  Int? // year of releaseDate, denormalized for the Year comparison
+  // Every non-souvenir container the skin appears in, JSON-encoded
+  // [{id,name,type,releaseDate}]. Kept so the original-release choice can
+  // be re-derived or audited without a re-import; gameplay only ever uses
+  // the canonical fields above.
+  containers   String   @default("[]")
+  color        String // dominant colour derived from the skin render (clue only; never compared)
   colorSource  String // "image" | "fallback" — how `color` was derived (documents provenance)
   weaponCategory String @default("rifle") // weapon family, see lib/game/weaponMatching.ts
   // Lowercased "weapon | name" used for case-insensitive search. Prisma's
@@ -62,6 +72,7 @@ model Skin {
   @@index([active])
   @@index([weapon])
   @@index([rarity])
+  @@index([releaseYear])
   @@index([searchText])
 }
 
@@ -109,12 +120,11 @@ model DailySkinGame {
 // The target id is NEVER serialized to the client until the game ends.
 // ---------------------------------------------------------------------------
 
-// `mode` and `status` are plain strings rather than Prisma enums — SQLite's
-// connector doesn't support enums, and this schema targets both SQLite
-// (local dev) and Postgres (production) without forking. Valid values are
-// enforced at the application layer via the GameMode/GameStatus TS unions
-// in src/lib/game/types.ts — the same pattern already used for rarity,
-// wear, and color.
+// `mode` and `status` are plain strings rather than Prisma enums, a
+// holdover from the earlier SQLite setup that costs nothing to keep. Valid
+// values are enforced at the application layer via the GameMode/GameStatus
+// TS unions in src/lib/game/types.ts — the same pattern used for rarity
+// and colour.
 model GameSession {
   id            String     @id @default(cuid())
   sessionToken  String // anonymous player identifier, from a signed httpOnly cookie
