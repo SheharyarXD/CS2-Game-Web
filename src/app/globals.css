@@ -66,19 +66,25 @@
 */
 html {
   color-scheme: dark;
-  background-color: #8fa1ae;
+  background-color: #a3b1bd;
   /*
-    Layered to match the reference menu, front to back:
-      1. a corner vignette that pulls the eye inward
-      2. the soft light bloom the art is built around, sitting left of
-         centre where the crest is rather than dead centre
-      3. the steel-blue field itself, which stays light all the way down —
-         the reference never goes near black at the bottom edge
+    Matched against the client's menu screenshots rather than invented.
+    Sampling those shots, the field is light and flat: roughly #b9c6d0 at
+    its brightest through the middle-left, #a6b4c0 across the top, and it
+    never drops below about #93a1ad at the very bottom. The earlier version
+    fell to #76-78 down there, which read as a dark gaming backdrop instead
+    of the pale steel the reference actually is.
+
+    Layered front to back:
+      1. a gentle corner vignette
+      2. the broad bloom the composition is built around, left of centre
+         where the seal sits
+      3. the flat steel field
   */
   background-image:
-    radial-gradient(ellipse 118% 96% at 50% 44%, rgba(20, 32, 42, 0) 52%, rgba(20, 32, 42, 0.34) 100%),
-    radial-gradient(ellipse 60% 56% at 26% 46%, rgba(218, 231, 240, 0.6) 0%, rgba(176, 195, 209, 0) 72%),
-    linear-gradient(180deg, #8ba0af 0%, #a7b8c4 28%, #9daebb 58%, #8395a3 86%, #71838f 100%);
+    radial-gradient(ellipse 108% 92% at 44% 48%, rgba(26, 40, 52, 0) 42%, rgba(26, 40, 52, 0.3) 100%),
+    radial-gradient(ellipse 58% 56% at 21% 50%, rgba(231, 240, 246, 0.72) 0%, rgba(198, 212, 223, 0) 76%),
+    linear-gradient(178deg, #9dabb8 0%, #b3c0cb 32%, #b0bdc8 60%, #9caab6 86%, #8f9da9 100%);
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
@@ -93,10 +99,10 @@ body {
 }
 
 /*
-  CT crest watermark. In the reference it sits left of centre at roughly a
-  quarter of the viewport width, large and very low contrast — readable as
-  a shape rather than as a logo, and never competing with the panels that
-  sit over it.
+  The seal watermark. In the reference it sits left of centre at roughly a
+  fifth of the viewport width, vertically centred, and is enormous —
+  close to two thirds of the viewport height — but so low in contrast that
+  it reads as a shape rather than a logo.
 */
 body::before {
   content: "";
@@ -106,26 +112,37 @@ body::before {
   pointer-events: none;
   background-image: url("/textures/ct-logo.svg");
   background-repeat: no-repeat;
-  background-position: 24% 47%;
-  background-size: 840px auto;
-  opacity: 0.5;
+  /*
+    Positioned by calculation, not by percentage. A percentage
+    background-position aligns that point OF THE IMAGE with the same point
+    of the box, so "19%" on a 468px-wide seal actually lands its centre
+    near 28% of the viewport. Offsetting by half the image width instead
+    puts the centre exactly where the reference has it — a little under a
+    fifth across, so the seal sits mostly behind the left column with its
+    outer edge showing in the margin.
+  */
+  background-size: auto 52vh;
+  background-position: calc(17vw - 26vh) 50%;
+  opacity: 0.42;
 }
 
-/* On narrow screens the crest would sit behind the content column, so it
-   pulls back to a size and position that stays out of the way. */
+/* Narrow screens have no side margin to spare, so the seal centres and
+   fades back further rather than sitting behind the content column. */
 @media (max-width: 900px) {
   body::before {
-    background-position: 50% 40%;
-    background-size: 560px auto;
-    opacity: 0.32;
+    background-size: auto 46vh;
+    background-position: calc(50vw - 23vh) 42%;
+    opacity: 0.18;
   }
 }
 
 /*
-  Drifting atmospheric haze. Two bands at different speeds give it depth.
-  Kept well below the old opacity: the reference reads as still air with a
-  little haze in it, not as weather, and a heavier layer washes out the
-  skin images sitting on top.
+  Drifting atmospheric haze, plus a trace of grain so the large flat
+  gradient underneath does not band on a wide display.
+
+  Both are kept very light: in the reference the air is still and clean,
+  and anything heavier both departs from the screenshots and washes out
+  the skin images sitting on top.
 */
 body::after {
   content: "";
@@ -133,19 +150,19 @@ body::after {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: url("/textures/fog.svg"), url("/textures/fog.svg");
-  background-repeat: repeat-x, repeat-x;
-  background-size: 1400px auto, 2100px auto;
-  opacity: 0.42;
-  animation: fog-drift 150s linear infinite;
+  background-image: url("/textures/fog.svg"), url("/textures/fog.svg"), url("/textures/noise.svg");
+  background-repeat: repeat-x, repeat-x, repeat;
+  background-size: 1600px auto, 2400px auto, 180px 180px;
+  opacity: 0.26;
+  animation: fog-drift 180s linear infinite;
 }
 
 @keyframes fog-drift {
   from {
-    background-position: 0 22%, 0 66%;
+    background-position: 0 22%, 0 66%, 0 0;
   }
   to {
-    background-position: 1400px 22%, -2100px 66%;
+    background-position: 1600px 22%, -2400px 66%, 0 0;
   }
 }
 

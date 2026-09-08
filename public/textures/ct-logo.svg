@@ -1,40 +1,83 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="660" height="660" viewBox="0 0 660 660">
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
   <!--
-    Counter-Terrorist style crest: an eagle over a shield, drawn from
-    scratch as an original approximation of the faction emblem the client
-    fades into its menu backdrop.
+    The faint seal the client's menu fades into its backdrop: a large
+    concentric ring with a ticked outer band and a star at the centre.
+
+    Drawn from scratch as an original approximation rather than lifted
+    art. At the opacity it renders at, what registers is the silhouette —
+    a big soft circle low in contrast, sitting left of centre — so the
+    interior is kept simple and the whole thing is blurred slightly to
+    match the softness of the reference.
   -->
   <defs>
-    <linearGradient id="crest" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.30" />
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.12" />
-    </linearGradient>
+    <radialGradient id="fade" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+      <stop offset="62%" stop-color="#ffffff" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.15" />
+    </radialGradient>
+    <filter id="soften" x="-12%" y="-12%" width="124%" height="124%">
+      <feGaussianBlur stdDeviation="3.2" />
+    </filter>
   </defs>
 
-  <g fill="none" stroke="url(#crest)" stroke-width="3">
-    <circle cx="330" cy="330" r="238" />
-    <circle cx="330" cy="330" r="212" stroke-width="1.5" />
-  </g>
+  <g filter="url(#soften)" fill="none" stroke="url(#fade)">
+    <!-- outer band -->
+    <circle cx="450" cy="450" r="404" stroke-width="11" />
+    <circle cx="450" cy="450" r="366" stroke-width="5" />
 
-  <g fill="url(#crest)">
-    <!-- eagle head -->
-    <path d="M330 128c-15 0-27 11-27 25 0 8 4 15 10 19l-6 12 23-6 23 6-6-12c6-4 10-11 10-19 0-14-12-25-27-25Zm13 20a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z" />
+    <!-- tick marks around the band -->
+    <g stroke-width="5" stroke-linecap="butt">
+      <g transform="rotate(0 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(9 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(18 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(27 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(36 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(45 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(54 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(63 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(72 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(81 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(90 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(99 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(108 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(117 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(126 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(135 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(144 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(153 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(162 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(171 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(180 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(189 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(198 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(207 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(216 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(225 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(234 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(243 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(252 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(261 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(270 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(279 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(288 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(297 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(306 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(315 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(324 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(333 450 450)"><path d="M450 50 v22" /></g>
+      <g transform="rotate(342 450 450)"><path d="M450 50 v30" /></g>
+      <g transform="rotate(351 450 450)"><path d="M450 50 v22" /></g>
+    </g>
 
-    <!-- left wing -->
-    <path d="M300 190 152 168l38 40-66-10 52 44-64-4 74 48-70 6 84 36 296-2Z" opacity="0.75" />
-    <!-- right wing -->
-    <path d="M360 190 508 168l-38 40 66-10-52 44 64-4-74 48 70 6-84 36-296-2Z" opacity="0.75" />
+    <!-- inner rings -->
+    <circle cx="450" cy="450" r="286" stroke-width="6" />
+    <circle cx="450" cy="450" r="252" stroke-width="3" />
 
-    <!-- shield -->
-    <path d="M330 252 200 288v96c0 76 52 132 130 156 78-24 130-80 130-156v-96l-130-36Zm0 34 96 27v71c0 57-38 100-96 120-58-20-96-63-96-120v-71l96-27Z" />
-
-    <!-- shield inner star -->
-    <path d="m330 322 17 37 40 5-30 27 8 40-35-20-35 20 8-40-30-27 40-5Z" opacity="0.9" />
-  </g>
-
-  <!-- laurel sweep beneath -->
-  <g fill="none" stroke="url(#crest)" stroke-width="4" stroke-linecap="round">
-    <path d="M176 470q154 96 308 0" />
-    <path d="M206 500q124 70 248 0" opacity="0.6" />
+    <!-- eight-point compass star -->
+    <g stroke-width="2.2" stroke-linejoin="round" opacity="0.55">
+      <path d="M450 196 L492 408 L704 450 L492 492 L450 704 L408 492 L196 450 L408 408 Z" />
+      <path d="M450 268 L474 426 L632 450 L474 474 L450 632 L426 474 L268 450 L426 426 Z" />
+    </g>
+    <circle cx="450" cy="450" r="58" stroke-width="2.4" opacity="0.55" />
   </g>
 </svg>
